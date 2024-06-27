@@ -14,107 +14,107 @@
     OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 /*global module*/
-(function () {
+(() => {
 
-    var userContext,
-        userInstance,
-        pipe = function (param, val) {
-            param.value = val;
+    let userContext;
+    let userInstance;
+    const pipe = (param, val) => {
+        param.value = val;
+    };
+    const Super = Object.create(null, {
+        activate: {
+            writable: true,
+            value: function (doActivate) {
+                if (doActivate) {
+                    this.input.disconnect();
+                    this.input.connect(this.activateNode);
+                    if (this.activateCallback) {
+                        this.activateCallback(doActivate);
+                    }
+                } else {
+                    this.input.disconnect();
+                    this.input.connect(this.output);
+                }
+            }
         },
-        Super = Object.create(null, {
-            activate: {
-                writable: true,
-                value: function (doActivate) {
-                    if (doActivate) {
-                        this.input.disconnect();
-                        this.input.connect(this.activateNode);
-                        if (this.activateCallback) {
-                            this.activateCallback(doActivate);
-                        }
+        bypass: {
+            get: function () {
+                return this._bypass;
+            },
+            set: function (value) {
+                if (this._lastBypassValue === value) {
+                    return;
+                }
+                this._bypass = value;
+                this.activate(!value);
+                this._lastBypassValue = value;
+            }
+        },
+        connect: {
+            value: function (target) {
+                this.output.connect(target);
+            }
+        },
+        disconnect: {
+            value: function (target) {
+                this.output.disconnect(target);
+            }
+        },
+        connectInOrder: {
+            value: (nodeArray) => {
+                let i = nodeArray.length - 1;
+                while (i--) {
+                    if (!nodeArray[i].connect) {
+                        return console.error("AudioNode.connectInOrder: TypeError: Not an AudioNode.", nodeArray[i]);
+                    }
+                    if (nodeArray[i + 1].input) {
+                        nodeArray[i].connect(nodeArray[i + 1].input);
                     } else {
-                        this.input.disconnect();
-                        this.input.connect(this.output);
-                    }
-                }
-            },
-            bypass: {
-                get: function () {
-                    return this._bypass;
-                },
-                set: function (value) {
-                    if (this._lastBypassValue === value) {
-                        return;
-                    }
-                    this._bypass = value;
-                    this.activate(!value);
-                    this._lastBypassValue = value;
-                }
-            },
-            connect: {
-                value: function (target) {
-                    this.output.connect(target);
-                }
-            },
-            disconnect: {
-                value: function (target) {
-                    this.output.disconnect(target);
-                }
-            },
-            connectInOrder: {
-                value: function (nodeArray) {
-                    var i = nodeArray.length - 1;
-                    while (i--) {
-                        if (!nodeArray[i].connect) {
-                            return console.error("AudioNode.connectInOrder: TypeError: Not an AudioNode.", nodeArray[i]);
-                        }
-                        if (nodeArray[i + 1].input) {
-                            nodeArray[i].connect(nodeArray[i + 1].input);
-                        } else {
-                            nodeArray[i].connect(nodeArray[i + 1]);
-                        }
-                    }
-                }
-            },
-            getDefaults: {
-                value: function () {
-                    var result = {};
-                    for (var key in this.defaults) {
-                        result[key] = this.defaults[key].value;
-                    }
-                    return result;
-                }
-            },
-            automate: {
-                value: function (property, value, duration, startTime) {
-                    var start = startTime ? ~~(startTime / 1000) : userContext.currentTime,
-                        dur = duration ? ~~(duration / 1000) : 0,
-                        _is = this.defaults[property],
-                        param = this[property],
-                        method;
-
-                    if (param) {
-                        if (_is.automatable) {
-                            if (!duration) {
-                                method = "setValueAtTime";
-                            } else {
-                                method = "linearRampToValueAtTime";
-                                param.cancelScheduledValues(start);
-                                param.setValueAtTime(param.value, start);
-                            }
-                            param[method](value, dur + start);
-                        } else {
-                            param = value;
-                        }
-                    } else {
-                        console.error("Invalid Property for " + this.name);
+                        nodeArray[i].connect(nodeArray[i + 1]);
                     }
                 }
             }
-        }),
-        FLOAT = "float",
-        BOOLEAN = "boolean",
-        STRING = "string",
-        INT = "int";
+        },
+        getDefaults: {
+            value: function () {
+                const result = {};
+                for (const key in this.defaults) {
+                    result[key] = this.defaults[key].value;
+                }
+                return result;
+            }
+        },
+        automate: {
+            value: function (property, value, duration, startTime) {
+                const start = startTime ? ~~(startTime / 1000) : userContext.currentTime;
+                const dur = duration ? ~~(duration / 1000) : 0;
+                const _is = this.defaults[property];
+                let param = this[property];
+                let method;
+
+                if (param) {
+                    if (_is.automatable) {
+                        if (!duration) {
+                            method = "setValueAtTime";
+                        } else {
+                            method = "linearRampToValueAtTime";
+                            param.cancelScheduledValues(start);
+                            param.setValueAtTime(param.value, start);
+                        }
+                        param[method](value, dur + start);
+                    } else {
+                        param = value;
+                    }
+                } else {
+                    console.error(`Invalid Property for ${this.name}`);
+                }
+            }
+        }
+    });
+    const FLOAT = "float";
+    const BOOLEAN = "boolean";
+    const STRING = "string";
+    const INT = "int";
 
     if (typeof module !== "undefined" && module.exports) {
         module.exports = Tuna;
@@ -133,58 +133,61 @@
             return new Tuna(context);
         }
 
-        var _window = typeof window === "undefined" ? {} : window;
+        const _window = typeof window === "undefined" ? {} : window;
 
         if (!_window.AudioContext) {
             _window.AudioContext = _window.webkitAudioContext;
         }
+        let newContext;
         if (!context) {
             console.log("tuna.js: Missing audio context! Creating a new context for you.");
-            context = _window.AudioContext && (new _window.AudioContext());
+            newContext = _window.AudioContext && (new _window.AudioContext());
         }
-        if (!context) {
+        if (!newContext) {
             throw new Error("Tuna cannot initialize because this environment does not support web audio.");
         }
-        connectify(context);
-        userContext = context;
+        connectify(newContext);
+        userContext = newContext;
         userInstance = this;
     }
 
     function connectify(context) {
         if (context.__connectified__ === true) return;
 
-        var gain = context.createGain(),
-            proto = Object.getPrototypeOf(Object.getPrototypeOf(gain)),
-            oconnect = proto.connect;
+        const gain = context.createGain();
+        const proto = Object.getPrototypeOf(Object.getPrototypeOf(gain));
+        const oconnect = proto.connect;
 
         proto.connect = shimConnect;
         context.__connectified__ = true; // Prevent overriding connect more than once
 
-        function shimConnect() {
-            var node = arguments[0];
-            arguments[0] = Super.isPrototypeOf ? (Super.isPrototypeOf(node) ? node.input : node) : (node.input || node);
-            oconnect.apply(this, arguments);
+        function shimConnect(...args) {
+            const node = args[0];
+            args[0] = Super.isPrototypeOf ? (Super.isPrototypeOf(node) ? node.input : node) : (node.input || node);
+            oconnect.apply(this, args);
             return node;
         }
     }
 
     function dbToWAVolume(db) {
-        return Math.max(0, Math.round(100 * Math.pow(2, db / 6)) / 100);
+        return Math.max(0, Math.round(100 * 2 ** (db / 6)) / 100);
     }
 
     function fmod(x, y) {
         // http://kevin.vanzonneveld.net
         // *     example 1: fmod(5.7, 1.3);
         // *     returns 1: 0.5
-        var tmp, tmp2, p = 0,
-            pY = 0,
-            l = 0.0,
-            l2 = 0.0;
+        let tmp;
+        let tmp2;
+        let p = 0;
+        let pY = 0;
+        let l = 0.0;
+        let l2 = 0.0;
 
         tmp = x.toExponential().match(/^.\.?(.*)e(.+)$/);
-        p = parseInt(tmp[2], 10) - (tmp[1] + "").length;
+        p = Number.parseInt(tmp[2], 10) - (`${tmp[1]}`).length;
         tmp = y.toExponential().match(/^.\.?(.*)e(.+)$/);
-        pY = parseInt(tmp[2], 10) - (tmp[1] + "").length;
+        pY = Number.parseInt(tmp[2], 10) - (`${tmp[1]}`).length;
 
         if (pY > p) {
             p = pY;
@@ -195,20 +198,18 @@
         if (p < -100 || p > 20) {
             // toFixed will give an out of bound error so we fix it like this:
             l = Math.round(Math.log(tmp2) / Math.log(10));
-            l2 = Math.pow(10, l);
+            l2 = 10 ** l;
 
             return (tmp2 / l2).toFixed(l - p) * l2;
-        } else {
-            return parseFloat(tmp2.toFixed(-p));
         }
+        return Number.parseFloat(tmp2.toFixed(-p));
     }
 
     function sign(x) {
         if (x === 0) {
             return 1;
-        } else {
-            return Math.abs(x) / x;
         }
+        return Math.abs(x) / x;
     }
 
     function tanh(n) {
@@ -219,7 +220,8 @@
         return userVal === undefined ? defaultVal : userVal;
     }
 
-    Tuna.prototype.Bitcrusher = function (properties) {
+    Tuna.prototype.Bitcrusher = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -233,13 +235,17 @@
         this.activateNode.connect(this.processor);
         this.processor.connect(this.output);
 
-        var phaser = 0,
-            last = 0,
-            input, output, step, i, length;
+        let phaser = 0;
+        let last = 0;
+        let input;
+        let output;
+        let step;
+        let i;
+        let length;
         this.processor.onaudioprocess = function (e) {
-            input = e.inputBuffer.getChannelData(0),
-                output = e.outputBuffer.getChannelData(0),
-                step = Math.pow(1 / 2, this.bits);
+            input = e.inputBuffer.getChannelData(0)
+            output = e.outputBuffer.getChannelData(0)
+            step = (1 / 2) ** this.bits;
             length = input.length;
             for (i = 0; i < length; i++) {
                 phaser += this.normfreq;
@@ -310,7 +316,8 @@
         }
     });
 
-    Tuna.prototype.Cabinet = function (properties) {
+    Tuna.prototype.Cabinet = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -358,17 +365,16 @@
             }
         },
         newConvolver: {
-            value: function (impulsePath) {
-                return new userInstance.Convolver({
-                    impulse: impulsePath,
-                    dryLevel: 0,
-                    wetLevel: 1
-                });
-            }
+            value: (impulsePath) => new userInstance.Convolver({
+                impulse: impulsePath,
+                dryLevel: 0,
+                wetLevel: 1
+            })
         }
     });
 
-    Tuna.prototype.Chorus = function (properties) {
+    Tuna.prototype.Chorus = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -462,7 +468,7 @@
                 return this._delay;
             },
             set: function (value) {
-                this._delay = 0.0002 * (Math.pow(10, value) * 2);
+                this._delay = 0.0002 * (10 ** value * 2);
                 this.lfoL.offset = this._delay;
                 this.lfoR.offset = this._delay;
                 this._depth = this._depth;
@@ -503,7 +509,8 @@
         }
     });
 
-    Tuna.prototype.Compressor = function (properties) {
+    Tuna.prototype.Compressor = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -593,8 +600,8 @@
         },
         computeMakeup: {
             value: function () {
-                var magicCoefficient = 4, // raise me if the output is too hot
-                    c = this.compNode;
+                const magicCoefficient = 4; // raise me if the output is too hot
+                const c = this.compNode;
                 return -(c.threshold.value - c.threshold.value / c.ratio.value) / magicCoefficient;
             }
         },
@@ -667,7 +674,8 @@
         }
     });
 
-    Tuna.prototype.Convolver = function (properties) {
+    Tuna.prototype.Convolver = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -794,21 +802,21 @@
                 return this.convolver.buffer;
             },
             set: function (impulse) {
-                var convolver = this.convolver,
-                    xhr = new XMLHttpRequest();
+                const convolver = this.convolver;
+                const xhr = new XMLHttpRequest();
                 if (!impulse) {
                     console.log("Tuna.Convolver.setBuffer: Missing impulse path!");
                     return;
                 }
                 xhr.open("GET", impulse, true);
                 xhr.responseType = "arraybuffer";
-                xhr.onreadystatechange = function () {
+                xhr.onreadystatechange = () => {
                     if (xhr.readyState === 4) {
                         if (xhr.status < 300 && xhr.status > 199 || xhr.status === 302) {
-                            userContext.decodeAudioData(xhr.response, function (buffer) {
+                            userContext.decodeAudioData(xhr.response, (buffer) => {
                                 convolver.buffer = buffer;
-                            }, function (e) {
-                                if (e) console.log("Tuna.Convolver.setBuffer: Error decoding data" + e);
+                            }, (e) => {
+                                if (e) console.log(`Tuna.Convolver.setBuffer: Error decoding data${e}`);
                             });
                         }
                     }
@@ -818,7 +826,8 @@
         }
     });
 
-    Tuna.prototype.Delay = function (properties) {
+    Tuna.prototype.Delay = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -945,7 +954,8 @@
         }
     });
 
-    Tuna.prototype.Filter = function (properties) {
+    Tuna.prototype.Filter = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -1042,7 +1052,8 @@
         }
     });
 
-    Tuna.prototype.Gain = function (properties) {
+    Tuna.prototype.Gain = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -1089,7 +1100,8 @@
         }
     });
 
-    Tuna.prototype.MoogFilter = function (properties) {
+    Tuna.prototype.MoogFilter = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -1103,9 +1115,22 @@
         this.activateNode.connect(this.processor);
         this.processor.connect(this.output);
 
-        var in1, in2, in3, in4, out1, out2, out3, out4;
+        let in1;
+        let in2;
+        let in3;
+        let in4;
+        let out1;
+        let out2;
+        let out3;
+        let out4;
         in1 = in2 = in3 = in4 = out1 = out2 = out3 = out4 = 0.0;
-        var input, output, f, fb, i, length, inputFactor;
+        let input;
+        let output;
+        let f;
+        let fb;
+        let i;
+        let length;
+        let inputFactor;
         this.processor.onaudioprocess = function (e) {
             input = e.inputBuffer.getChannelData(0);
             output = e.outputBuffer.getChannelData(0);
@@ -1187,7 +1212,8 @@
         }
     });
 
-    Tuna.prototype.Overdrive = function (properties) {
+    Tuna.prototype.Overdrive = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -1298,52 +1324,64 @@
         },
         waveshaperAlgorithms: {
             value: [
-                function (amount, n_samples, ws_table) {
+                (amountArg, n_samples, ws_table) => {
+                    let amount = amountArg;
                     amount = Math.min(amount, 0.9999);
-                    var k = 2 * amount / (1 - amount),
-                        i, x;
+                    const k = 2 * amount / (1 - amount);
+                    let i;
+                    let x;
                     for (i = 0; i < n_samples; i++) {
                         x = i * 2 / n_samples - 1;
                         ws_table[i] = (1 + k) * x / (1 + k * Math.abs(x));
                     }
                 },
-                function (amount, n_samples, ws_table) {
-                    var i, x, y;
+                (amount, n_samples, ws_table) => {
+                    let i;
+                    let x;
+                    let y;
                     for (i = 0; i < n_samples; i++) {
                         x = i * 2 / n_samples - 1;
-                        y = ((0.5 * Math.pow((x + 1.4), 2)) - 1) * (y >= 0 ? 5.8 : 1.2);
+                        y = ((0.5 * (x + 1.4) ** 2) - 1) * (y >= 0 ? 5.8 : 1.2);
                         ws_table[i] = tanh(y);
                     }
                 },
-                function (amount, n_samples, ws_table) {
-                    var i, x, y, a = 1 - amount;
+                (amount, n_samples, ws_table) => {
+                    let i;
+                    let x;
+                    let y;
+                    const a = 1 - amount;
                     for (i = 0; i < n_samples; i++) {
                         x = i * 2 / n_samples - 1;
-                        y = x < 0 ? -Math.pow(Math.abs(x), a + 0.04) : Math.pow(x, a);
+                        y = x < 0 ? -(Math.abs(x) ** (a + 0.04)) : x ** a;
                         ws_table[i] = tanh(y * 2);
                     }
                 },
-                function (amount, n_samples, ws_table) {
-                    var i, x, y, abx, a = 1 - amount > 0.99 ? 0.99 : 1 - amount;
+                (amount, n_samples, ws_table) => {
+                    let i;
+                    let x;
+                    let y;
+                    let abx;
+                    const a = 1 - amount > 0.99 ? 0.99 : 1 - amount;
                     for (i = 0; i < n_samples; i++) {
                         x = i * 2 / n_samples - 1;
                         abx = Math.abs(x);
                         if (abx < a) {
                             y = abx;
                         } else if (abx > a) {
-                            y = a + (abx - a) / (1 + Math.pow((abx - a) / (1 - a), 2));
+                            y = a + (abx - a) / (1 + ((abx - a) / (1 - a)) ** 2);
                         } else if (abx > 1) {
                             y = abx;
                         }
                         ws_table[i] = sign(x) * y * (1 / ((a + 1) / 2));
                     }
                 },
-                function (amount, n_samples, ws_table) { // fixed curve, amount doesn't do anything, the distortion is just from the drive
-                    var i, x;
+                (amount, n_samples, ws_table) => { // fixed curve, amount doesn't do anything, the distortion is just from the drive
+                    let i;
+                    let x;
                     for (i = 0; i < n_samples; i++) {
                         x = i * 2 / n_samples - 1;
                         if (x < -0.08905) {
-                            ws_table[i] = (-3 / 4) * (1 - (Math.pow((1 - (Math.abs(x) - 0.032857)), 12)) + (1 / 3) * (Math.abs(x) - 0.032847)) + 0.01;
+                            ws_table[i] = (-3 / 4) * (1 - ((1 - (Math.abs(x) - 0.032857)) ** 12) + (1 / 3) * (Math.abs(x) - 0.032847)) + 0.01;
                         } else if (x >= -0.08905 && x < 0.320018) {
                             ws_table[i] = (-6.153 * (x * x)) + 3.9375 * x;
                         } else {
@@ -1351,12 +1389,13 @@
                         }
                     }
                 },
-                function (amount, n_samples, ws_table) {
-                    var a = 2 + Math.round(amount * 14),
-                        // we go from 2 to 16 bits, keep in mind for the UI
-                        bits = Math.round(Math.pow(2, a - 1)),
-                        // real number of quantization steps divided by 2
-                        i, x;
+                (amount, n_samples, ws_table) => {
+                    const a = 2 + Math.round(amount * 14);
+                    // we go from 2 to 16 bits, keep in mind for the UI
+                    const bits = Math.round(2 ** (a - 1));
+                    // real number of quantization steps divided by 2
+                    let i;
+                    let x;
                     for (i = 0; i < n_samples; i++) {
                         x = i * 2 / n_samples - 1;
                         ws_table[i] = Math.round(x * bits) / bits;
@@ -1366,7 +1405,8 @@
         }
     });
 
-    Tuna.prototype.Panner = function (properties) {
+    Tuna.prototype.Panner = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -1414,7 +1454,8 @@
         }
     });
 
-    Tuna.prototype.Phaser = function (properties) {
+    Tuna.prototype.Phaser = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -1436,7 +1477,7 @@
             callback: this.callback
         });
 
-        var i = this.stage;
+        let i = this.stage;
         while (i--) {
             this.filtersL[i] = userContext.createBiquadFilter();
             this.filtersR[i] = userContext.createBiquadFilter();
@@ -1520,8 +1561,8 @@
             }
         },
         callback: {
-            value: function (filters, value) {
-                for (var stage = 0; stage < 4; stage++) {
+            value: (filters, value) => {
+                for (let stage = 0; stage < 4; stage++) {
                     filters[stage].frequency.value = value;
                 }
             }
@@ -1574,14 +1615,15 @@
             },
             set: function (value) {
                 this._stereoPhase = value;
-                var newPhase = this.lfoL._phase + this._stereoPhase * Math.PI / 180;
+                let newPhase = this.lfoL._phase + this._stereoPhase * Math.PI / 180;
                 newPhase = fmod(newPhase, 2 * Math.PI);
                 this.lfoR._phase = newPhase;
             }
         }
     });
 
-    Tuna.prototype.PingPongDelay = function (properties) {
+    Tuna.prototype.PingPongDelay = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -1699,7 +1741,8 @@
         }
     });
 
-    Tuna.prototype.Tremolo = function (properties) {
+    Tuna.prototype.Tremolo = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -1803,14 +1846,15 @@
             },
             set: function (value) {
                 this._stereoPhase = value;
-                var newPhase = this.lfoL._phase + this._stereoPhase * Math.PI / 180;
+                let newPhase = this.lfoL._phase + this._stereoPhase * Math.PI / 180;
                 newPhase = fmod(newPhase, 2 * Math.PI);
                 this.lfoR.phase = newPhase;
             }
         }
     });
 
-    Tuna.prototype.WahWah = function (properties) {
+    Tuna.prototype.WahWah = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -1818,7 +1862,7 @@
         this.activateNode = userContext.createGain();
         this.envelopeFollower = new userInstance.EnvelopeFollower({
             target: this,
-            callback: function (context, value) {
+            callback: (context, value) => {
                 context.sweep = value;
             }
         });
@@ -1938,7 +1982,7 @@
                 return this._sweep;
             },
             set: function (value) {
-                this._sweep = Math.pow(value > 1 ? 1 : value < 0 ? 0 : value, this._sensitivity);
+                this._sweep = (value > 1 ? 1 : value < 0 ? 0 : value) ** this._sensitivity;
                 this.setFilterFreq();
             }
         },
@@ -1948,8 +1992,8 @@
                 return this._baseFrequency;
             },
             set: function (value) {
-                this._baseFrequency = 50 * Math.pow(10, value * 2);
-                this._excursionFrequency = Math.min(userContext.sampleRate / 2, this.baseFrequency * Math.pow(2, this._excursionOctaves));
+                this._baseFrequency = 50 * 10 ** (value * 2);
+                this._excursionFrequency = Math.min(userContext.sampleRate / 2, this.baseFrequency * 2 ** this._excursionOctaves);
                 this.setFilterFreq();
             }
         },
@@ -1960,7 +2004,7 @@
             },
             set: function (value) {
                 this._excursionOctaves = value;
-                this._excursionFrequency = Math.min(userContext.sampleRate / 2, this.baseFrequency * Math.pow(2, this._excursionOctaves));
+                this._excursionFrequency = Math.min(userContext.sampleRate / 2, this.baseFrequency * 2 ** this._excursionOctaves);
                 this.setFilterFreq();
             }
         },
@@ -1970,7 +2014,7 @@
                 return this._sensitivity;
             },
             set: function (value) {
-                this._sensitivity = Math.pow(10, value);
+                this._sensitivity = 10 ** value;
             }
         },
         resonance: {
@@ -1997,7 +2041,8 @@
         }
     });
 
-    Tuna.prototype.EnvelopeFollower = function (properties) {
+    Tuna.prototype.EnvelopeFollower = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -2010,7 +2055,7 @@
         this.releaseTime = initValue(properties.releaseTime, this.defaults.releaseTime.value);
         this._envelope = 0;
         this.target = properties.target || {};
-        this.callback = properties.callback || function () { };
+        this.callback = properties.callback || (() => { });
 
         this.bypass = properties.bypass || this.defaults.bypass.value;
     };
@@ -2078,7 +2123,7 @@
                 if (typeof value === "function") {
                     this._callback = value;
                 } else {
-                    console.error("tuna.js: " + this.name + ": Callback must be a function!");
+                    console.error(`tuna.js: ${this.name}: Callback must be a function!`);
                 }
             }
         },
@@ -2106,17 +2151,18 @@
             }
         },
         returnCompute: {
-            value: function (instance) {
-                return function (event) {
-                    instance.compute(event);
-                };
+            value: (instance) => (event) => {
+                instance.compute(event);
             }
         },
         compute: {
             value: function (event) {
-                var count = event.inputBuffer.getChannelData(0).length,
-                    channels = event.inputBuffer.numberOfChannels,
-                    current, chan, rms, i;
+                const count = event.inputBuffer.getChannelData(0).length;
+                const channels = event.inputBuffer.numberOfChannels;
+                let current;
+                let chan;
+                let rms;
+                let i;
                 chan = rms = i = 0;
 
                 for (chan = 0; chan < channels; ++chan) {
@@ -2139,7 +2185,8 @@
         }
     });
 
-    Tuna.prototype.LFO = function (properties) {
+    Tuna.prototype.LFO = function (propertiesArg) {
+        let properties = propertiesArg;
         if (!properties) {
             properties = this.getDefaults();
         }
@@ -2155,7 +2202,7 @@
         this.oscillation = initValue(properties.oscillation, this.defaults.oscillation.value);
         this.phase = initValue(properties.phase, this.defaults.phase.value);
         this.target = properties.target || {};
-        this.output.onaudioprocess = this.callback(properties.callback || function () { });
+        this.output.onaudioprocess = this.callback(properties.callback || (() => { }));
         this.bypass = properties.bypass || this.defaults.bypass.value;
     };
     Tuna.prototype.LFO.prototype = Object.create(Super, {
@@ -2260,19 +2307,16 @@
         },
         callback: {
             value: function (callback) {
-                var that = this;
-                return function () {
-                    that._phase += that._phaseInc;
-                    if (that._phase > 2 * Math.PI) {
-                        that._phase = 0;
+                return () => {
+                    this._phase += this._phaseInc;
+                    if (this._phase > 2 * Math.PI) {
+                        this._phase = 0;
                     }
-                    callback(that._target, that._offset + that._oscillation * Math.sin(that._phase));
+                    callback(this._target, this._offset + this._oscillation * Math.sin(this._phase));
                 };
             }
         }
     });
 
-    Tuna.toString = Tuna.prototype.toString = function () {
-        return "Please visit https://github.com/Theodeus/tuna/wiki for instructions on how to use Tuna.js";
-    };
+    Tuna.toString = Tuna.prototype.toString = () => "Please visit https://github.com/Theodeus/tuna/wiki for instructions on how to use Tuna.js";
 })();
