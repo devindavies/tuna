@@ -610,8 +610,8 @@ abstract class Super<T extends Defaults> extends AudioNode {
 	activateCallback!: (doActivate: boolean) => void;
 	defaults!: T;
 
-	protected _bypass!: boolean;
-	protected _lastBypassValue!: boolean;
+	_bypass!: boolean;
+	_lastBypassValue!: boolean;
 
 	get bypass() {
 		return this._bypass;
@@ -795,7 +795,7 @@ export class Tuna {
 	Compressor = class Compressor extends Super<typeof COMPRESSOR_DEFAULTS> {
 		compNode: DynamicsCompressorNode;
 		makeupNode: GainNode;
-		private _automakeup!: boolean;
+		#automakeup!: boolean;
 		threshold: number;
 		defaults: typeof COMPRESSOR_DEFAULTS;
 		constructor(propertiesArg: Properties<typeof COMPRESSOR_DEFAULTS>) {
@@ -848,11 +848,11 @@ export class Tuna {
 		}
 
 		get automakeup() {
-			return this._automakeup;
+			return this.#automakeup;
 		}
 		set automakeup(value) {
-			this._automakeup = value;
-			if (this._automakeup) this.makeupGain = this.computeMakeup();
+			this.#automakeup = value;
+			if (this.#automakeup) this.makeupGain = this.computeMakeup();
 		}
 
 		get makeupGain(): AudioParam {
@@ -872,7 +872,7 @@ export class Tuna {
 
 		set ratio(value: number) {
 			this.compNode.ratio.value = value;
-			if (this._automakeup) this.makeupGain = this.computeMakeup();
+			if (this.#automakeup) this.makeupGain = this.computeMakeup();
 		}
 
 		get knee(): AudioParam {
@@ -881,7 +881,7 @@ export class Tuna {
 
 		set knee(value: number) {
 			this.compNode.knee.value = value;
-			if (this._automakeup) this.makeupGain = this.computeMakeup();
+			if (this.#automakeup) this.makeupGain = this.computeMakeup();
 		}
 
 		get attack(): AudioParam {
@@ -907,7 +907,6 @@ export class Tuna {
 		}
 		makeupNode: GainNode;
 		convolver: InstanceType<Tuna["Convolver"]>;
-		_automakeup!: boolean;
 		constructor(
 			propertiesArg: Properties<typeof CABINET_DEFAULTS> & {
 				impulsePath?: string;
@@ -968,10 +967,10 @@ export class Tuna {
 		merger: ChannelMergerNode;
 		lfoL: InstanceType<Tuna["LFO"]>;
 		lfoR: InstanceType<Tuna["LFO"]>;
-		private _delay!: number;
-		private _depth!: number;
-		private _feedback!: number;
-		private _rate!: number;
+		#delay!: number;
+		#depth!: number;
+		#feedback!: number;
+		#rate!: number;
 
 		constructor(propertiesArg: Properties<typeof CHORUS_DEFAULTS>) {
 			super();
@@ -1027,52 +1026,52 @@ export class Tuna {
 		}
 
 		get delay() {
-			return this._delay;
+			return this.#delay;
 		}
 
 		set delay(value: number) {
-			this._delay = 0.0002 * (10 ** value * 2);
-			this.lfoL.offset = this._delay;
-			this.lfoR.offset = this._delay;
-			this._depth = this._depth;
+			this.#delay = 0.0002 * (10 ** value * 2);
+			this.lfoL.offset = this.#delay;
+			this.lfoR.offset = this.#delay;
+			this.#depth = this.#depth;
 		}
 
 		get depth() {
-			return this._depth;
+			return this.#depth;
 		}
 
 		set depth(value: number) {
-			this._depth = value;
-			this.lfoL.oscillation = this._depth * this._delay;
-			this.lfoR.oscillation = this._depth * this._delay;
+			this.#depth = value;
+			this.lfoL.oscillation = this.#depth * this.#delay;
+			this.lfoR.oscillation = this.#depth * this.#delay;
 		}
 
 		get feedback() {
-			return this._feedback;
+			return this.#feedback;
 		}
 
 		set feedback(value: number) {
-			this._feedback = value;
+			this.#feedback = value;
 			this.feedbackGainNodeLR.gain.setTargetAtTime(
-				this._feedback,
+				this.#feedback,
 				userContext.currentTime,
 				0.01,
 			);
 			this.feedbackGainNodeRL.gain.setTargetAtTime(
-				this._feedback,
+				this.#feedback,
 				userContext.currentTime,
 				0.01,
 			);
 		}
 
 		get rate() {
-			return this._rate;
+			return this.#rate;
 		}
 
 		set rate(value: number) {
-			this._rate = value;
-			this.lfoL.frequency = this._rate;
-			this.lfoR.frequency = this._rate;
+			this.#rate = value;
+			this.lfoL.frequency = this.#rate;
+			this.lfoR.frequency = this.#rate;
 		}
 	};
 
@@ -1496,9 +1495,9 @@ export class Tuna {
 		waveshaper: WaveShaperNode;
 		outputDrive: GainNode;
 		ws_table: Float32Array;
-		private _curveAmount!: number;
-		private _algorithmIndex!: number;
-		private _outputGain!: number;
+		#curveAmount!: number;
+		#algorithmIndex!: number;
+		#outputGain!: number;
 
 		constructor(propertiesArg: Properties<typeof OVERDRIVE_DEFAULTS>) {
 			super();
@@ -1616,15 +1615,15 @@ export class Tuna {
 			this.inputDrive.gain.value = value;
 		}
 		get curveAmount() {
-			return this._curveAmount;
+			return this.#curveAmount;
 		}
 		set curveAmount(value) {
-			this._curveAmount = value;
-			if (this._algorithmIndex === undefined) {
-				this._algorithmIndex = 0;
+			this.#curveAmount = value;
+			if (this.#algorithmIndex === undefined) {
+				this.#algorithmIndex = 0;
 			}
-			this.waveshaperAlgorithms[this._algorithmIndex](
-				this._curveAmount,
+			this.waveshaperAlgorithms[this.#algorithmIndex](
+				this.#curveAmount,
 				this.k_nSamples,
 				this.ws_table,
 			);
@@ -1634,19 +1633,19 @@ export class Tuna {
 			return this.outputDrive.gain;
 		}
 		set outputGain(value: number) {
-			this._outputGain = dbToWAVolume(value);
+			this.#outputGain = dbToWAVolume(value);
 			this.outputDrive.gain.setTargetAtTime(
-				this._outputGain,
+				this.#outputGain,
 				userContext.currentTime,
 				0.01,
 			);
 		}
 		get algorithmIndex() {
-			return this._algorithmIndex;
+			return this.#algorithmIndex;
 		}
 		set algorithmIndex(value) {
-			this._algorithmIndex = value;
-			this.curveAmount = this._curveAmount;
+			this.#algorithmIndex = value;
+			this.curveAmount = this.#curveAmount;
 		}
 	};
 
@@ -1690,11 +1689,11 @@ export class Tuna {
 		filtersR: BiquadFilterNode[];
 		lfoL: InstanceType<Tuna["LFO"]>;
 		lfoR: InstanceType<Tuna["LFO"]>;
-		private _depth!: number;
-		private _baseModulationFrequency!: number;
-		private _rate!: number;
-		private _feedback!: number;
-		private _stereoPhase!: number;
+		#depth!: number;
+		#baseModulationFrequency!: number;
+		#rate!: number;
+		#feedback!: number;
+		#stereoPhase!: number;
 
 		constructor(propertiesArg: Properties<typeof PHASER_DEFAULTS>) {
 			super();
@@ -1763,52 +1762,52 @@ export class Tuna {
 			this.bypass = properties.bypass || this.defaults.bypass.value;
 		}
 		get depth() {
-			return this._depth;
+			return this.#depth;
 		}
 		set depth(value) {
-			this._depth = value;
-			this.lfoL.oscillation = this._baseModulationFrequency * this._depth;
-			this.lfoR.oscillation = this._baseModulationFrequency * this._depth;
+			this.#depth = value;
+			this.lfoL.oscillation = this.#baseModulationFrequency * this.#depth;
+			this.lfoR.oscillation = this.#baseModulationFrequency * this.#depth;
 		}
 		get rate() {
-			return this._rate;
+			return this.#rate;
 		}
 		set rate(value) {
-			this._rate = value;
-			this.lfoL.frequency = this._rate;
-			this.lfoR.frequency = this._rate;
+			this.#rate = value;
+			this.lfoL.frequency = this.#rate;
+			this.lfoR.frequency = this.#rate;
 		}
 		get baseModulationFrequency() {
-			return this._baseModulationFrequency;
+			return this.#baseModulationFrequency;
 		}
 		set baseModulationFrequency(value) {
-			this._baseModulationFrequency = value;
-			this.lfoL.offset = this._baseModulationFrequency;
-			this.lfoR.offset = this._baseModulationFrequency;
-			this.depth = this._depth;
+			this.#baseModulationFrequency = value;
+			this.lfoL.offset = this.#baseModulationFrequency;
+			this.lfoR.offset = this.#baseModulationFrequency;
+			this.depth = this.#depth;
 		}
 		get feedback() {
-			return this._feedback;
+			return this.#feedback;
 		}
 		set feedback(value) {
-			this._feedback = value;
+			this.#feedback = value;
 			this.feedbackGainNodeL.gain.setTargetAtTime(
-				this._feedback,
+				this.#feedback,
 				userContext.currentTime,
 				0.01,
 			);
 			this.feedbackGainNodeR.gain.setTargetAtTime(
-				this._feedback,
+				this.#feedback,
 				userContext.currentTime,
 				0.01,
 			);
 		}
 		get stereoPhase() {
-			return this._stereoPhase;
+			return this.#stereoPhase;
 		}
 		set stereoPhase(value) {
-			this._stereoPhase = value;
-			let newPhase = this.lfoL._phase + (this._stereoPhase * Math.PI) / 180;
+			this.#stereoPhase = value;
+			let newPhase = this.lfoL._phase + (this.#stereoPhase * Math.PI) / 180;
 			newPhase = fmod(newPhase, 2 * Math.PI);
 			this.lfoR._phase = newPhase;
 		}
@@ -1830,8 +1829,8 @@ export class Tuna {
 		delayRight: DelayNode;
 		splitter: ChannelSplitterNode;
 		merger: ChannelMergerNode;
-		private _delayTimeLeft!: number;
-		private _delayTimeRight!: number;
+		#delayTimeLeft!: number;
+		#delayTimeRight!: number;
 
 		constructor(propertiesArg: Properties<typeof PINGPONGDELAY_DEFAULTS>) {
 			super();
@@ -1885,17 +1884,17 @@ export class Tuna {
 			this.bypass = properties.bypass || this.defaults.bypass.value;
 		}
 		get delayTimeLeft() {
-			return this._delayTimeLeft;
+			return this.#delayTimeLeft;
 		}
 		set delayTimeLeft(value) {
-			this._delayTimeLeft = value;
+			this.#delayTimeLeft = value;
 			this.delayLeft.delayTime.value = value / 1000;
 		}
 		get delayTimeRight() {
-			return this._delayTimeRight;
+			return this.#delayTimeRight;
 		}
 		set delayTimeRight(value) {
-			this._delayTimeRight = value;
+			this.#delayTimeRight = value;
 			this.delayRight.delayTime.value = value / 1000;
 		}
 		get wetLevel(): AudioParam {
@@ -1923,9 +1922,9 @@ export class Tuna {
 		merger: ChannelMergerNode;
 		lfoL: InstanceType<Tuna["LFO"]>;
 		lfoR: InstanceType<Tuna["LFO"]>;
-		private _intensity!: number;
-		private _rate!: number;
-		private _stereoPhase!: number;
+		#intensity!: number;
+		#rate!: number;
+		#stereoPhase!: number;
 
 		constructor(propertiesArg: Properties<typeof TREMOLO_DEFAULTS>) {
 			super();
@@ -1975,29 +1974,29 @@ export class Tuna {
 			this.bypass = properties.bypass || this.defaults.bypass.value;
 		}
 		get intensity() {
-			return this._intensity;
+			return this.#intensity;
 		}
 		set intensity(value) {
-			this._intensity = value;
-			this.lfoL.offset = 1 - this._intensity / 2;
-			this.lfoR.offset = 1 - this._intensity / 2;
-			this.lfoL.oscillation = this._intensity;
-			this.lfoR.oscillation = this._intensity;
+			this.#intensity = value;
+			this.lfoL.offset = 1 - this.#intensity / 2;
+			this.lfoR.offset = 1 - this.#intensity / 2;
+			this.lfoL.oscillation = this.#intensity;
+			this.lfoR.oscillation = this.#intensity;
 		}
 		get rate() {
-			return this._rate;
+			return this.#rate;
 		}
 		set rate(value) {
-			this._rate = value;
-			this.lfoL.frequency = this._rate;
-			this.lfoR.frequency = this._rate;
+			this.#rate = value;
+			this.lfoL.frequency = this.#rate;
+			this.lfoR.frequency = this.#rate;
 		}
 		get stereoPhase() {
-			return this._stereoPhase;
+			return this.#stereoPhase;
 		}
 		set stereoPhase(value) {
-			this._stereoPhase = value;
-			let newPhase = this.lfoL._phase + (this._stereoPhase * Math.PI) / 180;
+			this.#stereoPhase = value;
+			let newPhase = this.lfoL._phase + (this.#stereoPhase * Math.PI) / 180;
 			newPhase = fmod(newPhase, 2 * Math.PI);
 			this.lfoR.phase = newPhase;
 		}
@@ -2010,13 +2009,13 @@ export class Tuna {
 		filterPeaking: BiquadFilterNode;
 		activateNode: GainNode;
 		output: GainNode;
-		private _automode!: boolean;
-		private _sweep!: number;
-		private _sensitivity!: number;
-		private _baseFrequency!: number;
-		private _excursionOctaves!: number;
-		private _resonance!: number;
-		private _excursionFrequency!: number;
+		#automode!: boolean;
+		#sweep!: number;
+		#sensitivity!: number;
+		#baseFrequency!: number;
+		#excursionOctaves!: number;
+		#resonance!: number;
+		#excursionFrequency!: number;
 		constructor(propertiesArg: Properties<typeof WAHWAH_DEFAULTS>) {
 			super();
 			this.filterFreqTimeout = 0;
@@ -2066,10 +2065,10 @@ export class Tuna {
 			this.bypass = properties.bypass || this.defaults.bypass.value;
 		}
 		get automode() {
-			return this._automode;
+			return this.#automode;
 		}
 		set automode(value) {
-			this._automode = value;
+			this.#automode = value;
 			if (value) {
 				this.activateNode.connect(this.envelopeFollower.input);
 				this.envelopeFollower.activate(true);
@@ -2080,58 +2079,58 @@ export class Tuna {
 			}
 		}
 		get sweep() {
-			return this._sweep;
+			return this.#sweep;
 		}
 		set sweep(value) {
-			this._sweep =
-				(value > 1 ? 1 : value < 0 ? 0 : value) ** this._sensitivity;
+			this.#sweep =
+				(value > 1 ? 1 : value < 0 ? 0 : value) ** this.#sensitivity;
 			this.setFilterFreq();
 		}
 		get baseFrequency() {
-			return this._baseFrequency;
+			return this.#baseFrequency;
 		}
 		set baseFrequency(value) {
-			this._baseFrequency = 50 * 10 ** (value * 2);
-			this._excursionFrequency = Math.min(
+			this.#baseFrequency = 50 * 10 ** (value * 2);
+			this.#excursionFrequency = Math.min(
 				userContext.sampleRate / 2,
-				this.baseFrequency * 2 ** this._excursionOctaves,
+				this.baseFrequency * 2 ** this.#excursionOctaves,
 			);
 			this.setFilterFreq();
 		}
 		get excursionOctaves() {
-			return this._excursionOctaves;
+			return this.#excursionOctaves;
 		}
 		set excursionOctaves(value) {
-			this._excursionOctaves = value;
-			this._excursionFrequency = Math.min(
+			this.#excursionOctaves = value;
+			this.#excursionFrequency = Math.min(
 				userContext.sampleRate / 2,
-				this.baseFrequency * 2 ** this._excursionOctaves,
+				this.baseFrequency * 2 ** this.#excursionOctaves,
 			);
 			this.setFilterFreq();
 		}
 		get sensitivity() {
-			return this._sensitivity;
+			return this.#sensitivity;
 		}
 		set sensitivity(value) {
-			this._sensitivity = 10 ** value;
+			this.#sensitivity = 10 ** value;
 		}
 		get resonance() {
-			return this._resonance;
+			return this.#resonance;
 		}
 		set resonance(value) {
-			this._resonance = value;
-			this.filterPeaking.Q.value = this._resonance;
+			this.#resonance = value;
+			this.filterPeaking.Q.value = this.#resonance;
 		}
 
 		setFilterFreq() {
 			try {
 				this.filterBp.frequency.value = Math.min(
 					22050,
-					this._baseFrequency + this._excursionFrequency * this._sweep,
+					this.#baseFrequency + this.#excursionFrequency * this.#sweep,
 				);
 				this.filterPeaking.frequency.value = Math.min(
 					22050,
-					this._baseFrequency + this._excursionFrequency * this._sweep,
+					this.#baseFrequency + this.#excursionFrequency * this.#sweep,
 				);
 			} catch (e) {
 				clearTimeout(this.filterFreqTimeout);
@@ -2157,7 +2156,7 @@ export class Tuna {
 	EnvelopeFollower = class EnvelopeFollower extends Super<
 		typeof ENVELOPEFOLLOWER_DEFAULTS
 	> {
-		private _callback!: <T>(
+		#callback!: <T>(
 			context: {
 				sweep: T;
 			},
@@ -2167,12 +2166,12 @@ export class Tuna {
 		envelope: number;
 		sampleRate: number;
 		jsNode: ScriptProcessorNode;
-		private _envelope: number;
-		private _attackTime!: number;
-		private _attackC!: number;
-		private _releaseTime!: number;
-		private _releaseC!: number;
-		private _target?: AudioNode;
+		#envelope: number;
+		#attackTime!: number;
+		#attackC!: number;
+		#releaseTime!: number;
+		#releaseC!: number;
+		#target?: AudioNode;
 		activated: boolean;
 		constructor(
 			propertiesArg: Properties<typeof ENVELOPEFOLLOWER_DEFAULTS> & {
@@ -2207,32 +2206,32 @@ export class Tuna {
 				properties.releaseTime,
 				this.defaults.releaseTime.value,
 			);
-			this._envelope = 0;
+			this.#envelope = 0;
 			this.target = properties.target;
 			this.callback = properties.callback || (() => {});
 
 			this.bypass = properties.bypass || this.defaults.bypass.value;
 		}
 		get attackTime() {
-			return this._attackTime;
+			return this.#attackTime;
 		}
 		set attackTime(value) {
-			this._attackTime = value;
-			this._attackC = Math.exp(
-				((-1 / this._attackTime) * this.sampleRate) / this.buffersize,
+			this.#attackTime = value;
+			this.#attackC = Math.exp(
+				((-1 / this.#attackTime) * this.sampleRate) / this.buffersize,
 			);
 		}
 		get releaseTime() {
-			return this._releaseTime;
+			return this.#releaseTime;
 		}
 		set releaseTime(value) {
-			this._releaseTime = value;
-			this._releaseC = Math.exp(
-				((-1 / this._releaseTime) * this.sampleRate) / this.buffersize,
+			this.#releaseTime = value;
+			this.#releaseC = Math.exp(
+				((-1 / this.#releaseTime) * this.sampleRate) / this.buffersize,
 			);
 		}
 		get callback() {
-			return this._callback;
+			return this.#callback;
 		}
 		set callback(value: <T>(
 			context: {
@@ -2241,7 +2240,7 @@ export class Tuna {
 			value: T,
 		) => void) {
 			if (typeof value === "function") {
-				this._callback = value;
+				this.#callback = value;
 			} else {
 				console.error(
 					`tuna.js: ${this.constructor.name}: Callback must be a function!`,
@@ -2249,10 +2248,10 @@ export class Tuna {
 			}
 		}
 		get target(): AudioNode | undefined {
-			return this._target;
+			return this.#target;
 		}
 		set target(value: AudioNode | undefined) {
-			this._target = value;
+			this.#target = value;
 		}
 
 		activate(doActivate: boolean) {
@@ -2292,17 +2291,17 @@ export class Tuna {
 			}
 			rms = Math.sqrt(rms / channels);
 
-			if (this._envelope < rms) {
-				this._envelope *= this._attackC;
-				this._envelope += (1 - this._attackC) * rms;
+			if (this.#envelope < rms) {
+				this.#envelope *= this.#attackC;
+				this.#envelope += (1 - this.#attackC) * rms;
 			} else {
-				this._envelope *= this._releaseC;
-				this._envelope += (1 - this._releaseC) * rms;
+				this.#envelope *= this.#releaseC;
+				this.#envelope += (1 - this.#releaseC) * rms;
 			}
-			this._target &&
-				this._callback(
-					this._target as InstanceType<Tuna["WahWah"]>,
-					this._envelope,
+			this.#target &&
+				this.#callback(
+					this.#target as InstanceType<Tuna["WahWah"]>,
+					this.#envelope,
 				);
 		}
 	};
@@ -2312,12 +2311,12 @@ export class Tuna {
 		sampleRate: number;
 		output: ScriptProcessorNode;
 
-		private _frequency!: number;
-		private _phaseInc!: number;
-		private _offset!: number;
-		private _oscillation!: number;
+		#frequency!: number;
+		#phaseInc!: number;
+		#offset!: number;
+		#oscillation!: number;
 		_phase!: number;
-		private _target!: AudioParam | AudioNode | AudioNode[] | undefined;
+		#target!: AudioParam | AudioNode | AudioNode[] | undefined;
 
 		constructor(
 			propertiesArg: Properties<typeof LFO_DEFAULTS> & {
@@ -2361,24 +2360,24 @@ export class Tuna {
 			this.bypass = properties.bypass || this.defaults.bypass.value;
 		}
 		get frequency() {
-			return this._frequency;
+			return this.#frequency;
 		}
 		set frequency(value) {
-			this._frequency = value;
-			this._phaseInc =
-				(2 * Math.PI * this._frequency * this.bufferSize) / this.sampleRate;
+			this.#frequency = value;
+			this.#phaseInc =
+				(2 * Math.PI * this.#frequency * this.bufferSize) / this.sampleRate;
 		}
 		get offset() {
-			return this._offset;
+			return this.#offset;
 		}
 		set offset(value) {
-			this._offset = value;
+			this.#offset = value;
 		}
 		get oscillation() {
-			return this._oscillation;
+			return this.#oscillation;
 		}
 		set oscillation(value) {
-			this._oscillation = value;
+			this.#oscillation = value;
 		}
 		get phase() {
 			return this._phase;
@@ -2387,10 +2386,10 @@ export class Tuna {
 			this._phase = value;
 		}
 		get target(): AudioParam | AudioNode | AudioNode[] | undefined {
-			return this._target;
+			return this.#target;
 		}
 		set target(value: AudioParam | AudioNode | AudioNode[] | undefined) {
-			this._target = value;
+			this.#target = value;
 		}
 
 		activate(doActivate: boolean) {
@@ -2410,13 +2409,13 @@ export class Tuna {
 			) => void,
 		) {
 			return () => {
-				this._phase += this._phaseInc;
+				this._phase += this.#phaseInc;
 				if (this._phase > 2 * Math.PI) {
 					this._phase = 0;
 				}
 				callback(
-					this._target,
-					this._offset + this._oscillation * Math.sin(this._phase),
+					this.#target,
+					this.#offset + this.#oscillation * Math.sin(this._phase),
 				);
 			};
 		}
