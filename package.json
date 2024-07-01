@@ -1,38 +1,33 @@
 {
-  "name": "tunajs",
-  "version": "1.0.15",
-  "description": "Audio effects library for the Web Audio API",
-  "main": "tuna.js",
-  "directories": {
-    "test": "tests"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "uglify": "uglifyjs tuna.js -o tuna-min.js",
-    "patch": "npm version patch && npm publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Theodeus/tuna.git"
-  },
-  "keywords": [
-    "web audio",
-    "audio effects",
-    "tuna",
-    "tunajs",
-    "tuna.js"
-  ],
-  "author": "Oskar Eriksson",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Theodeus/tuna/issues"
-  },
-  "homepage": "https://github.com/Theodeus/tuna#readme",
-  "devDependencies": {
-    "@biomejs/biome": "^1.8.3",
-    "@types/node": "^20.14.9",
-    "express": "^4.17.1",
-    "typescript": "^5.5.2",
-    "uglify-js": "^3.4.9"
-  }
+	"name": "tunajs",
+	"version": "1.0.15",
+	"description": "Audio effects library for the Web Audio API",
+	"main": "tuna.js",
+	"directories": {
+		"test": "tests"
+	},
+	"scripts": {
+		"build": "tsc",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"uglify": "uglifyjs tuna.js -o tuna-min.js",
+		"patch": "npm version patch && npm publish"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Theodeus/tuna.git"
+	},
+	"keywords": ["web audio", "audio effects", "tuna", "tunajs", "tuna.js"],
+	"author": "Oskar Eriksson",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Theodeus/tuna/issues"
+	},
+	"homepage": "https://github.com/Theodeus/tuna#readme",
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.3",
+		"@types/node": "^20.14.9",
+		"express": "^4.17.1",
+		"typescript": "^5.5.2",
+		"uglify-js": "^3.4.9"
+	}
 }

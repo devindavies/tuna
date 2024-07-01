@@ -2172,7 +2172,7 @@ export class Tuna {
 		private _attackC!: number;
 		private _releaseTime!: number;
 		private _releaseC!: number;
-		private _target?: InstanceType<Tuna["WahWah"]>;
+		private _target?: AudioNode;
 		activated: boolean;
 		constructor(
 			propertiesArg: Properties<typeof ENVELOPEFOLLOWER_DEFAULTS> & {
@@ -2248,10 +2248,10 @@ export class Tuna {
 				);
 			}
 		}
-		get target(): InstanceType<Tuna["WahWah"]> | undefined {
+		get target(): AudioNode | undefined {
 			return this._target;
 		}
-		set target(value: InstanceType<Tuna["WahWah"]> | undefined) {
+		set target(value: AudioNode | undefined) {
 			this._target = value;
 		}
 
@@ -2299,7 +2299,11 @@ export class Tuna {
 				this._envelope *= this._releaseC;
 				this._envelope += (1 - this._releaseC) * rms;
 			}
-			this._target && this._callback(this._target, this._envelope);
+			this._target &&
+				this._callback(
+					this._target as InstanceType<Tuna["WahWah"]>,
+					this._envelope,
+				);
 		}
 	};
 
@@ -2500,3 +2504,5 @@ function tanh(n: number) {
 function initValue<T>(userVal: T | undefined, defaultVal: T) {
 	return userVal === undefined ? defaultVal : userVal;
 }
+
+export default Tuna;
