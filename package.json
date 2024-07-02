@@ -1,37 +1,50 @@
 {
-  "name": "tunajs",
-  "version": "1.0.15",
-  "description": "Audio effects library for the Web Audio API",
-  "main": "tuna.js",
-  "directories": {
-    "test": "tests"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "uglify": "uglifyjs tuna.js -o tuna-min.js",
-    "patch": "npm version patch && npm publish"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Theodeus/tuna.git"
-  },
-  "keywords": [
-    "web audio",
-    "audio effects",
-    "tuna",
-    "tunajs",
-    "tuna.js"
-  ],
-  "author": "Oskar Eriksson",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Theodeus/tuna/issues"
-  },
-  "homepage": "https://github.com/Theodeus/tuna#readme",
-  "devDependencies": {
-    "eslint": "^5.6.1",
-    "express": "^4.17.1",
-    "uglify-js": "^3.4.9"
-  },
-  "dependencies": {}
+	"name": "tunajs",
+	"version": "1.0.15",
+	"description": "Audio effects library for the Web Audio API",
+	"main": "./dist/tuna.js",
+	"directories": {
+		"test": "tests"
+	},
+	"type": "module",
+	"source": "./src/tuna.ts",
+	"exports": {
+		".": {
+			"import": {
+				"default": "./dist/tuna.js",
+				"types": "./dist/tuna.d.ts"
+			},
+			"require": {
+				"default": "./dist/tuna.cjs",
+				"types": "./dist/tuna.d.cts"
+			},
+			"script": {
+				"default": "./dist/tuna.global.js",
+				"types": "./dist/tuna.d.ts"
+			}
+		}
+	},
+	"scripts": {
+		"build": "tsup src/tuna.ts",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"patch": "npm version patch && npm publish"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Theodeus/tuna.git"
+	},
+	"keywords": ["web audio", "audio effects", "tuna", "tunajs", "tuna.js"],
+	"author": "Oskar Eriksson",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/Theodeus/tuna/issues"
+	},
+	"homepage": "https://github.com/Theodeus/tuna#readme",
+	"devDependencies": {
+		"@biomejs/biome": "^1.8.3",
+		"@types/node": "^20.14.9",
+		"express": "^4.17.1",
+		"tsup": "^8.1.0",
+		"typescript": "^5.5.2"
+	}
 }
