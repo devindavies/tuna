@@ -23,7 +23,7 @@
         "removeComments": true
     },
     "include": [
-        "tuna.ts",
+        "src",
         "types",
         "global.d.ts"
     ],

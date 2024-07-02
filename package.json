@@ -7,6 +7,7 @@
 		"test": "tests"
 	},
 	"type": "module",
+	"source": "./src/tuna.ts",
 	"exports": {
 		".": {
 			"import": {
@@ -24,22 +25,15 @@
 		}
 	},
 	"scripts": {
-		"build": "tsup tuna.ts",
+		"build": "tsup src/tuna.ts",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"uglify": "uglifyjs tuna.js -o tuna-min.js",
 		"patch": "npm version patch && npm publish"
 	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Theodeus/tuna.git"
 	},
-	"keywords": [
-		"web audio",
-		"audio effects",
-		"tuna",
-		"tunajs",
-		"tuna.js"
-	],
+	"keywords": ["web audio", "audio effects", "tuna", "tunajs", "tuna.js"],
 	"author": "Oskar Eriksson",
 	"license": "MIT",
 	"bugs": {
