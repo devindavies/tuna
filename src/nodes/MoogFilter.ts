@@ -1,7 +1,6 @@
 import { Super } from "../Super";
 import { MOOGFILTER_DEFAULTS } from "../constants";
 import type { Properties } from "../types/Properties";
-import { initValue } from "../utils/initValue";
 
 export class MoogFilter extends Super<typeof MOOGFILTER_DEFAULTS> {
 	processor: ScriptProcessorNode & {
@@ -13,22 +12,16 @@ export class MoogFilter extends Super<typeof MOOGFILTER_DEFAULTS> {
 		context: AudioContext,
 		propertiesArg: Properties<typeof MOOGFILTER_DEFAULTS>,
 	) {
-		super();
+		super(context);
 		this.defaults = MOOGFILTER_DEFAULTS;
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
-		this.bufferSize = properties.bufferSize || this.defaults.bufferSize.value;
-		this.userContext = context;
-		this.input = this.userContext.createGain();
-		this.activateNode = this.userContext.createGain();
-		this.processor = this.userContext.createScriptProcessor(
-			this.bufferSize,
-			1,
-			1,
-		);
-		this.output = this.userContext.createGain();
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
+
+		this.bufferSize = options.bufferSize;
+		this.activateNode = new GainNode(context);
+		this.processor = this.context.createScriptProcessor(this.bufferSize, 1, 1);
 
 		this.activateNode.connect(this.processor);
 		this.processor.connect(this.output);
@@ -70,12 +63,9 @@ export class MoogFilter extends Super<typeof MOOGFILTER_DEFAULTS> {
 			}
 		};
 
-		this.cutoff = initValue(properties.cutoff, this.defaults.cutoff.value);
-		this.resonance = initValue(
-			properties.resonance,
-			this.defaults.resonance.value,
-		);
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+		this.cutoff = options.cutoff;
+		this.resonance = options.resonance;
+		this.bypass = options.bypass;
 	}
 
 	get cutoff() {

@@ -3,7 +3,6 @@ import { PHASER_DEFAULTS } from "../constants";
 import type Tuna from "../tuna";
 import type { Properties } from "../types/Properties";
 import { fmod } from "../utils/fmod";
-import { initValue } from "../utils/initValue";
 import type { LFO } from "./LFO";
 
 export class Phaser extends Super<typeof PHASER_DEFAULTS> {
@@ -29,26 +28,26 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 		context: AudioContext,
 		propertiesArg: Properties<typeof PHASER_DEFAULTS>,
 	) {
-		super();
+		super(context);
 		this.stage = 4;
 		this.defaults = PHASER_DEFAULTS;
 
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
-		this.userContext = context;
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
+
 		this.userInstance = instance;
-		this.input = this.userContext.createGain();
-		this.splitter = this.activateNode =
-			this.userContext.createChannelSplitter(2);
+		this.splitter = this.activateNode = new ChannelSplitterNode(context, {
+			numberOfOutputs: 2,
+		});
 		this.filtersL = [];
 		this.filtersR = [];
-		this.feedbackGainNodeL = this.userContext.createGain();
-		this.feedbackGainNodeR = this.userContext.createGain();
-		this.merger = this.userContext.createChannelMerger(2);
-		this.filteredSignal = this.userContext.createGain();
-		this.output = this.userContext.createGain();
+		this.feedbackGainNodeL = new GainNode(context);
+		this.feedbackGainNodeR = new GainNode(context);
+		this.merger = new ChannelMergerNode(context, { numberOfInputs: 2 });
+		this.filteredSignal = new GainNode(context);
+		this.output = new GainNode(context);
 		this.lfoL = this.userInstance.createLFO({
 			target: this.filtersL,
 			callback: this.callback,
@@ -60,13 +59,13 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 
 		let i = this.stage;
 		while (i--) {
-			this.filtersL[i] = this.userContext.createBiquadFilter();
-			this.filtersR[i] = this.userContext.createBiquadFilter();
+			this.filtersL[i] = new BiquadFilterNode(context);
+			this.filtersR[i] = new BiquadFilterNode(context);
 			this.filtersL[i].type = "allpass";
 			this.filtersR[i].type = "allpass";
 		}
-		this.input.connect(this.splitter);
-		this.input.connect(this.output);
+		this.connect(this.splitter);
+		this.connect(this.output);
 		this.splitter.connect(this.filtersL[0], 0, 0);
 		this.splitter.connect(this.filtersR[0], 1, 0);
 		this.connectInOrder(this.filtersL);
@@ -79,23 +78,15 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 		this.feedbackGainNodeR.connect(this.filtersR[0]);
 		this.merger.connect(this.output);
 
-		this.rate = initValue(properties.rate, this.defaults.rate.value);
-		this.baseModulationFrequency =
-			properties.baseModulationFrequency ||
-			this.defaults.baseModulationFrequency.value;
-		this.depth = initValue(properties.depth, this.defaults.depth.value);
-		this.feedback = initValue(
-			properties.feedback,
-			this.defaults.feedback.value,
-		);
-		this.stereoPhase = initValue(
-			properties.stereoPhase,
-			this.defaults.stereoPhase.value,
-		);
+		this.rate = options.rate;
+		this.baseModulationFrequency = options.baseModulationFrequency;
+		this.depth = options.depth;
+		this.feedback = options.feedback;
+		this.stereoPhase = options.stereoPhase;
 
 		this.lfoL.activate(true);
 		this.lfoR.activate(true);
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+		this.bypass = options.bypass;
 	}
 	get depth() {
 		return this.#depth;
@@ -129,12 +120,12 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 		this.#feedback = value;
 		this.feedbackGainNodeL.gain.setTargetAtTime(
 			this.#feedback,
-			this.userContext.currentTime,
+			this.context.currentTime,
 			0.01,
 		);
 		this.feedbackGainNodeR.gain.setTargetAtTime(
 			this.#feedback,
-			this.userContext.currentTime,
+			this.context.currentTime,
 			0.01,
 		);
 	}

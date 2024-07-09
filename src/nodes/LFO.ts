@@ -1,7 +1,6 @@
 import { Super } from "../Super";
 import { LFO_DEFAULTS } from "../constants";
 import type { Properties } from "../types/Properties";
-import { initValue } from "../utils/initValue";
 
 export class LFO extends Super<typeof LFO_DEFAULTS> {
 	bufferSize: number;
@@ -25,38 +24,28 @@ export class LFO extends Super<typeof LFO_DEFAULTS> {
 			) => void;
 		},
 	) {
-		super();
+		super(context);
 		this.bufferSize = 256;
 		this.sampleRate = 44100;
 
 		this.defaults = LFO_DEFAULTS;
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
 
 		//Instantiate AudioNode
-		this.userContext = context;
-		this.input = this.userContext.createGain();
-		this.output = this.userContext.createScriptProcessor(256, 1, 1);
-		this.activateNode = this.userContext.destination;
+		this.output = this.context.createScriptProcessor(256, 1, 1);
+		this.activateNode = this.context.destination;
 
 		//Set Properties
-		this.frequency = initValue(
-			properties.frequency,
-			this.defaults.frequency.value,
-		);
-		this.offset = initValue(properties.offset, this.defaults.offset.value);
-		this.oscillation = initValue(
-			properties.oscillation,
-			this.defaults.oscillation.value,
-		);
-		this.phase = initValue(properties.phase, this.defaults.phase.value);
-		this.target = properties.target;
-		this.output.onaudioprocess = this.callback(
-			properties.callback || (() => {}),
-		);
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+		this.frequency = options.frequency;
+		this.offset = options.offset;
+		this.oscillation = options.oscillation;
+		this.phase = options.phase;
+		this.target = options.target;
+		this.output.onaudioprocess = this.callback(options.callback || (() => {}));
+		this.bypass = options.bypass;
 	}
 	get frequency() {
 		return this.#frequency;
@@ -93,7 +82,7 @@ export class LFO extends Super<typeof LFO_DEFAULTS> {
 
 	activate(doActivate: boolean) {
 		if (doActivate) {
-			this.output.connect(this.userContext.destination);
+			this.output.connect(this.context.destination);
 			if (this.activateCallback) {
 				this.activateCallback(doActivate);
 			}

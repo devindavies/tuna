@@ -1,7 +1,6 @@
 import { Super } from "../Super";
 import { BITCRUSHER_DEFAULTS } from "../constants";
 import type { Properties } from "../types/Properties";
-import { initValue } from "../utils/initValue";
 
 export class Bitcrusher extends Super<typeof BITCRUSHER_DEFAULTS> {
 	processor: ScriptProcessorNode & { bits?: number; normfreq?: number };
@@ -12,23 +11,17 @@ export class Bitcrusher extends Super<typeof BITCRUSHER_DEFAULTS> {
 		context: AudioContext,
 		propertiesArg: Properties<typeof BITCRUSHER_DEFAULTS>,
 	) {
-		super();
+		super(context);
 		this.defaults = BITCRUSHER_DEFAULTS;
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
-		this.bufferSize = properties.bufferSize || this.defaults.bufferSize.value;
-		this.userContext = context;
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
 
-		this.input = this.userContext.createGain();
-		this.activateNode = this.userContext.createGain();
-		this.processor = this.userContext.createScriptProcessor(
-			this.bufferSize,
-			1,
-			1,
-		);
-		this.output = this.userContext.createGain();
+		this.bufferSize = options.bufferSize;
+
+		this.activateNode = new GainNode(context);
+		this.processor = this.context.createScriptProcessor(this.bufferSize, 1, 1);
 
 		this.activateNode.connect(this.processor);
 		this.processor.connect(this.output);
@@ -55,12 +48,9 @@ export class Bitcrusher extends Super<typeof BITCRUSHER_DEFAULTS> {
 			}
 		};
 
-		this.bits = properties.bits || this.defaults.bits.value;
-		this.normfreq = initValue(
-			properties.normfreq,
-			this.defaults.normfreq.value,
-		);
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+		this.bits = options.bits;
+		this.normfreq = options.normfreq;
+		this.bypass = options.bypass;
 	}
 
 	get bits() {

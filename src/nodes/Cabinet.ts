@@ -2,7 +2,6 @@ import { Super } from "../Super";
 import { CABINET_DEFAULTS } from "../constants";
 import type Tuna from "../tuna";
 import type { Properties } from "../types/Properties";
-import { initValue } from "../utils/initValue";
 import type { Convolver } from "./Convolver";
 
 export class Cabinet extends Super<typeof CABINET_DEFAULTS> {
@@ -20,31 +19,28 @@ export class Cabinet extends Super<typeof CABINET_DEFAULTS> {
 			impulsePath?: string;
 		},
 	) {
-		super();
+		super(context);
 		this.defaults = CABINET_DEFAULTS;
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
-		this.userContext = context;
-		this.userInstance = instance;
-		this.input = this.userContext.createGain();
-		this.activateNode = this.userContext.createGain();
-		this.convolver = this.newConvolver(
-			properties.impulsePath || "../impulses/impulse_guitar.wav",
-		);
-		this.makeupNode = this.userContext.createGain();
-		this.output = this.userContext.createGain();
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
 
-		this.activateNode.connect(this.convolver.input);
+		this.userInstance = instance;
+
+		this.activateNode = new GainNode(context);
+		this.convolver = this.newConvolver(
+			options.impulsePath || "../impulses/impulse_guitar.wav",
+		);
+		this.makeupNode = new GainNode(context, {
+			gain: options.makeupGain,
+		});
+
+		this.activateNode.connect(this.convolver);
 		this.convolver.output.connect(this.makeupNode);
 		this.makeupNode.connect(this.output);
-		//don't use makeupGain setter at init to avoid smoothing
-		this.makeupNode.gain.value = initValue(
-			properties.makeupGain,
-			this.defaults.makeupGain.value,
-		);
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+
+		this.bypass = options.bypass;
 	}
 
 	get makeupGain(): AudioParam {
@@ -52,11 +48,7 @@ export class Cabinet extends Super<typeof CABINET_DEFAULTS> {
 	}
 
 	set makeupGain(value: number) {
-		this.makeupNode.gain.setTargetAtTime(
-			value,
-			this.userContext.currentTime,
-			0.01,
-		);
+		this.makeupNode.gain.setTargetAtTime(value, this.context.currentTime, 0.01);
 	}
 
 	newConvolver = (impulsePath: string) =>

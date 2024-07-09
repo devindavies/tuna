@@ -3,7 +3,6 @@ import { TREMOLO_DEFAULTS } from "../constants";
 import type Tuna from "../tuna";
 import type { Properties } from "../types/Properties";
 import { fmod } from "../utils/fmod";
-import { initValue } from "../utils/initValue";
 import { pipe } from "../utils/pipe";
 import type { LFO } from "./LFO";
 
@@ -24,21 +23,21 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 		context: AudioContext,
 		propertiesArg: Properties<typeof TREMOLO_DEFAULTS>,
 	) {
-		super();
+		super(context);
 		this.defaults = TREMOLO_DEFAULTS;
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
-		this.userContext = context;
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
+
 		this.userInstance = instance;
-		this.input = this.userContext.createGain();
-		this.splitter = this.activateNode =
-			this.userContext.createChannelSplitter(2);
-		this.amplitudeL = this.userContext.createGain();
-		this.amplitudeR = this.userContext.createGain();
-		this.merger = this.userContext.createChannelMerger(2);
-		this.output = this.userContext.createGain();
+		this.splitter = this.activateNode = new ChannelSplitterNode(context, {
+			numberOfOutputs: 2,
+		});
+		this.amplitudeL = new GainNode(context);
+		this.amplitudeR = new GainNode(context);
+		this.merger = new ChannelMergerNode(context, { numberOfInputs: 2 });
+		this.output = new GainNode(context);
 		this.lfoL = this.userInstance.createLFO({
 			target: this.amplitudeL.gain,
 			callback: pipe,
@@ -48,22 +47,16 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 			callback: pipe,
 		});
 
-		this.input.connect(this.splitter);
+		this.connect(this.splitter);
 		this.splitter.connect(this.amplitudeL, 0);
 		this.splitter.connect(this.amplitudeR, 1);
 		this.amplitudeL.connect(this.merger, 0, 0);
 		this.amplitudeR.connect(this.merger, 0, 1);
 		this.merger.connect(this.output);
 
-		this.rate = properties.rate || this.defaults.rate.value;
-		this.intensity = initValue(
-			properties.intensity,
-			this.defaults.intensity.value,
-		);
-		this.stereoPhase = initValue(
-			properties.stereoPhase,
-			this.defaults.stereoPhase.value,
-		);
+		this.rate = options.rate;
+		this.intensity = options.intensity;
+		this.stereoPhase = options.stereoPhase;
 
 		this.lfoL.offset = 1 - this.intensity / 2;
 		this.lfoR.offset = 1 - this.intensity / 2;
@@ -71,7 +64,7 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 
 		this.lfoL.activate(true);
 		this.lfoR.activate(true);
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+		this.bypass = options.bypass;
 	}
 	get intensity() {
 		return this.#intensity;
