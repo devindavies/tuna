@@ -14,6 +14,7 @@ export class Convolver extends Super<typeof CONVOLVER_DEFAULTS> {
 	highCut: AudioParam;
 	dryLevel: AudioParam;
 	wetLevel: AudioParam;
+	output: GainNode;
 
 	constructor(
 		context: AudioContext,
