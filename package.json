@@ -6,6 +6,7 @@
 	"directories": {
 		"test": "tests"
 	},
+	"files": ["dist"],
 	"type": "module",
 	"source": "./src/tuna.ts",
 	"exports": {
@@ -25,6 +26,7 @@
 		}
 	},
 	"scripts": {
+		"prepare": "npm run build",
 		"build": "tsup src/tuna.ts",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"patch": "npm version patch && npm publish"
