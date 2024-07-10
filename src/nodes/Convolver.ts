@@ -14,7 +14,6 @@ export class Convolver extends Super<typeof CONVOLVER_DEFAULTS> {
 	highCut: AudioParam;
 	dryLevel: AudioParam;
 	wetLevel: AudioParam;
-	output: GainNode;
 
 	constructor(
 		context: AudioContext,
@@ -35,13 +34,12 @@ export class Convolver extends Super<typeof CONVOLVER_DEFAULTS> {
 		this.filterLow = new BiquadFilterNode(context);
 		this.filterHigh = new BiquadFilterNode(context);
 		this.wet = new GainNode(context);
-		this.output = new GainNode(context);
 
-		this.connect(this.filterLow);
-		this.connect(this.dry);
+		this.inputConnect(this.filterLow);
+		this.inputConnect(this.dry);
 		this.filterLow.connect(this.filterHigh);
 		this.filterHigh.connect(this);
-		this.connect(this.wet);
+		this.inputConnect(this.wet);
 		this.wet.connect(this.output);
 		this.dry.connect(this.output);
 
@@ -55,7 +53,7 @@ export class Convolver extends Super<typeof CONVOLVER_DEFAULTS> {
 		this.filterLow.type = "highpass";
 		this.buffer = this._convolver.buffer;
 		this.bypass = options.bypass;
-		this.level = this.output.gain;
+		this.level = (this.output as GainNode).gain;
 		this.lowCut = this.filterLow.frequency;
 		this.highCut = this.filterHigh.frequency;
 		this.dryLevel = this.dry.gain;

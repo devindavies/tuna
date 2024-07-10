@@ -10,7 +10,6 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	filterBp: BiquadFilterNode;
 	filterPeaking: BiquadFilterNode;
 	activateNode: GainNode;
-	output: GainNode;
 	#automode!: boolean;
 	#sweep!: number;
 	#sensitivity!: number;
@@ -46,7 +45,6 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 		});
 		this.filterBp = new BiquadFilterNode(context);
 		this.filterPeaking = new BiquadFilterNode(context);
-		this.output = new GainNode(context);
 
 		//Connect AudioNodes
 		this.activateNode.connect(this.filterBp);
@@ -142,7 +140,7 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	}
 
 	init() {
-		this.output.gain.value = 1;
+		(this.output as GainNode).gain.value = 1;
 		this.filterPeaking.type = "peaking";
 		this.filterBp.type = "bandpass";
 		this.filterPeaking.frequency.value = 100;

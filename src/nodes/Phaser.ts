@@ -47,7 +47,6 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 		this.feedbackGainNodeR = new GainNode(context);
 		this.merger = new ChannelMergerNode(context, { numberOfInputs: 2 });
 		this.filteredSignal = new GainNode(context);
-		this.output = new GainNode(context);
 		this.lfoL = this.userInstance.createLFO({
 			target: this.filtersL,
 			callback: this.callback,
@@ -64,8 +63,8 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 			this.filtersL[i].type = "allpass";
 			this.filtersR[i].type = "allpass";
 		}
-		this.connect(this.splitter);
-		this.connect(this.output);
+		this.inputConnect(this.splitter);
+		this.inputConnect(this.output);
 		this.splitter.connect(this.filtersL[0], 0, 0);
 		this.splitter.connect(this.filtersR[0], 1, 0);
 		this.connectInOrder(this.filtersL);

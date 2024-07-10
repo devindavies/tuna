@@ -13,7 +13,6 @@ type CompressorOptions = Required<
 
 export class Compressor extends Super<typeof COMPRESSOR_DEFAULTS> {
 	makeupNode: GainNode;
-	output: GainNode;
 	_compNode: DynamicsCompressorNode;
 	#automakeup!: boolean;
 
@@ -34,7 +33,6 @@ export class Compressor extends Super<typeof COMPRESSOR_DEFAULTS> {
 			options,
 		);
 		this.makeupNode = new GainNode(context);
-		this.output = new GainNode(context);
 		this._compNode.connect(this.makeupNode);
 		this.makeupNode.connect(context.destination);
 

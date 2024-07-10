@@ -24,7 +24,7 @@ export class Chorus extends Super<typeof CHORUS_DEFAULTS> {
 	constructor(
 		instance: Tuna,
 		context: AudioContext,
-		propertiesArg: Properties<typeof CHORUS_DEFAULTS>,
+		propertiesArg?: Properties<typeof CHORUS_DEFAULTS>,
 	) {
 		super(context);
 		this.defaults = CHORUS_DEFAULTS;
@@ -56,7 +56,7 @@ export class Chorus extends Super<typeof CHORUS_DEFAULTS> {
 			callback: pipe,
 		});
 
-		this.connect(this.attenuator);
+		this.inputConnect(this.attenuator);
 		this.attenuator.connect(this.output);
 		this.attenuator.connect(this.splitter);
 		this.splitter.connect(this.delayL, 0);

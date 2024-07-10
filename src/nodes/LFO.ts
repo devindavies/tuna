@@ -5,7 +5,6 @@ import type { Properties } from "../types/Properties";
 export class LFO extends Super<typeof LFO_DEFAULTS> {
 	bufferSize: number;
 	sampleRate: number;
-	output: ScriptProcessorNode;
 
 	#frequency!: number;
 	#phaseInc!: number;
@@ -24,7 +23,9 @@ export class LFO extends Super<typeof LFO_DEFAULTS> {
 			) => void;
 		},
 	) {
-		super(context);
+		const bufferSize = 256;
+		const processor = context.createScriptProcessor(bufferSize, 1, 1);
+		super(context, processor);
 		this.bufferSize = 256;
 		this.sampleRate = 44100;
 
@@ -35,7 +36,6 @@ export class LFO extends Super<typeof LFO_DEFAULTS> {
 		};
 
 		//Instantiate AudioNode
-		this.output = this.context.createScriptProcessor(256, 1, 1);
 		this.activateNode = this.context.destination;
 
 		//Set Properties
@@ -44,7 +44,9 @@ export class LFO extends Super<typeof LFO_DEFAULTS> {
 		this.oscillation = options.oscillation;
 		this.phase = options.phase;
 		this.target = options.target;
-		this.output.onaudioprocess = this.callback(options.callback || (() => {}));
+		(this.output as ScriptProcessorNode).onaudioprocess = this.callback(
+			options.callback || (() => {}),
+		);
 		this.bypass = options.bypass;
 	}
 	get frequency() {

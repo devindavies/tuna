@@ -1,5 +1,4 @@
 import type { Properties } from "./types/Properties";
-import { connectify } from "./utils/connectify";
 import { Bitcrusher } from "./nodes/Bitcrusher";
 import { Compressor } from "./nodes/Compressor";
 import { Cabinet } from "./nodes/Cabinet";
@@ -54,7 +53,7 @@ export class Tuna {
 				"Tuna cannot initialize because this environment does not support web audio.",
 			);
 		}
-		connectify(newContext);
+
 		this.userContext = newContext;
 		this.userInstance = this;
 	}

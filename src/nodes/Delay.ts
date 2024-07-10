@@ -25,7 +25,8 @@ export class Delay extends Super<typeof DELAY_DEFAULTS> {
 			...propertiesArg,
 		};
 
-		this.activateNode = this.delay = new DelayNode(context, {
+		this.activateNode = new GainNode(context);
+		this.delay = new DelayNode(context, {
 			delayTime: options.delayTime ?? 10,
 		});
 		this.dry = new GainNode(context, { gain: options.dryLevel });

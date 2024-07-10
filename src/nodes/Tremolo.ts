@@ -37,7 +37,6 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 		this.amplitudeL = new GainNode(context);
 		this.amplitudeR = new GainNode(context);
 		this.merger = new ChannelMergerNode(context, { numberOfInputs: 2 });
-		this.output = new GainNode(context);
 		this.lfoL = this.userInstance.createLFO({
 			target: this.amplitudeL.gain,
 			callback: pipe,
@@ -47,7 +46,7 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 			callback: pipe,
 		});
 
-		this.connect(this.splitter);
+		this.inputConnect(this.splitter);
 		this.splitter.connect(this.amplitudeL, 0);
 		this.splitter.connect(this.amplitudeR, 1);
 		this.amplitudeL.connect(this.merger, 0, 0);

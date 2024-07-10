@@ -9,12 +9,12 @@ export abstract class Super<T extends Defaults> extends GainNode {
 
 	_bypass?: boolean;
 	_lastBypassValue?: boolean;
-	_inputConnect: GainNode["connect"];
+	inputConnect: GainNode["connect"];
 
-	constructor(context: AudioContext) {
+	constructor(context: AudioContext, output?: AudioNode) {
 		super(context);
-		this._inputConnect = this.connect;
-		this.output = new GainNode(context);
+		this.inputConnect = this.connect;
+		this.output = output ?? new GainNode(context);
 		this.connect = this.output.connect.bind(this.output);
 	}
 
@@ -34,13 +34,13 @@ export abstract class Super<T extends Defaults> extends GainNode {
 	activate(doActivate: boolean) {
 		if (doActivate) {
 			this.disconnect();
-			this._inputConnect(this.activateNode);
+			this.inputConnect(this.activateNode);
 			if (this.activateCallback) {
 				this.activateCallback(doActivate);
 			}
 		} else {
 			this.disconnect();
-			this._inputConnect(this.output);
+			this.inputConnect(this.output);
 		}
 	}
 
@@ -99,5 +99,9 @@ export abstract class Super<T extends Defaults> extends GainNode {
 		} else {
 			console.error(`Invalid Property for ${this.constructor.name}`);
 		}
+	}
+
+	outputConnect(...args: [AudioNode, number?, number?]) {
+		return this.output.connect(...args);
 	}
 }

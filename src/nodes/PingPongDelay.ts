@@ -31,7 +31,6 @@ export class PingPongDelay extends Super<typeof PINGPONGDELAY_DEFAULTS> {
 		this.feedbackLevel = new GainNode(context, {
 			gain: options.feedback,
 		});
-		this.output = new GainNode(context);
 		this.delayLeft = new DelayNode(context, {
 			delayTime: 10,
 		});
