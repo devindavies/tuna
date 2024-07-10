@@ -1,7 +1,6 @@
 import { Super } from "../Super";
 import { ENVELOPEFOLLOWER_DEFAULTS } from "../constants";
 import type { Properties } from "../types/Properties";
-import { initValue } from "../utils/initValue";
 import type { WahWah } from "./WahWah";
 
 export class EnvelopeFollower extends Super<typeof ENVELOPEFOLLOWER_DEFAULTS> {
@@ -29,39 +28,32 @@ export class EnvelopeFollower extends Super<typeof ENVELOPEFOLLOWER_DEFAULTS> {
 			callback?: <T>(context: { sweep: T }, value: T) => void;
 		},
 	) {
-		super();
+		super(context);
 		this.buffersize = 256;
 		this.envelope = 0;
 		this.sampleRate = 44100;
 		this.defaults = ENVELOPEFOLLOWER_DEFAULTS;
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
-		this.userContext = context;
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
+
 		this.activated = false;
-		this.input = this.userContext.createGain();
-		this.jsNode = this.output = this.userContext.createScriptProcessor(
+		this.jsNode = this.output = this.context.createScriptProcessor(
 			this.buffersize,
 			1,
 			1,
 		);
 
-		this.input.connect(this.output);
+		this.connect(this.output);
 
-		this.attackTime = initValue(
-			properties.attackTime,
-			this.defaults.attackTime.value,
-		);
-		this.releaseTime = initValue(
-			properties.releaseTime,
-			this.defaults.releaseTime.value,
-		);
+		this.attackTime = options.attackTime;
+		this.releaseTime = options.releaseTime;
 		this.#envelope = 0;
-		this.target = properties.target;
-		this.callback = properties.callback || (() => {});
+		this.target = options.target;
+		this.callback = options.callback || (() => {});
 
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+		this.bypass = options.bypass;
 	}
 	get attackTime() {
 		return this.#attackTime;
@@ -108,7 +100,7 @@ export class EnvelopeFollower extends Super<typeof ENVELOPEFOLLOWER_DEFAULTS> {
 	activate(doActivate: boolean) {
 		this.activated = doActivate;
 		if (doActivate) {
-			this.jsNode.connect(this.userContext.destination);
+			this.jsNode.connect(this.context.destination);
 			this.jsNode.onaudioprocess = this.returnCompute(this);
 		} else {
 			this.jsNode.disconnect();

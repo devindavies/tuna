@@ -1,5 +1,3 @@
-import { Super } from "../Super";
-
 export function connectify(
 	context: AudioContext & { __connectified__?: boolean },
 ) {
@@ -14,7 +12,7 @@ export function connectify(
 
 	function shimConnect(this: AudioNode, ...args: AudioNode[]) {
 		const node = args[0];
-		args[0] = node instanceof Super ? node.input : node;
+		args[0] = node;
 		oconnect.apply(this, args);
 		return node;
 	}

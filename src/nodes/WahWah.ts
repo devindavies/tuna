@@ -2,7 +2,6 @@ import { Super } from "../Super";
 import { WAHWAH_DEFAULTS } from "../constants";
 import type Tuna from "../tuna";
 import type { Properties } from "../types/Properties";
-import { initValue } from "../utils/initValue";
 import type { EnvelopeFollower } from "./EnvelopeFollower";
 
 export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
@@ -26,26 +25,28 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 		context: AudioContext,
 		propertiesArg: Properties<typeof WAHWAH_DEFAULTS>,
 	) {
-		super();
+		super(context);
 		this.filterFreqTimeout = 0;
 		this.defaults = WAHWAH_DEFAULTS;
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
-		this.userContext = context;
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
+
 		this.userInstance = instance;
-		this.input = this.userContext.createGain();
-		this.activateNode = this.userContext.createGain();
+
+		this.activateNode = new GainNode(context, {
+			gain: 2,
+		});
 		this.envelopeFollower = this.userInstance.createEnvelopeFollower({
 			target: this,
 			callback: <T>(context: { sweep: T }, value: T) => {
 				context.sweep = value;
 			},
 		});
-		this.filterBp = this.userContext.createBiquadFilter();
-		this.filterPeaking = this.userContext.createBiquadFilter();
-		this.output = this.userContext.createGain();
+		this.filterBp = new BiquadFilterNode(context);
+		this.filterPeaking = new BiquadFilterNode(context);
+		this.output = new GainNode(context);
 
 		//Connect AudioNodes
 		this.activateNode.connect(this.filterBp);
@@ -54,26 +55,15 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 
 		//Set Properties
 		this.init();
-		this.automode = initValue(
-			properties.automode,
-			this.defaults.automode.value,
-		);
-		this.resonance = properties.resonance || this.defaults.resonance.value;
-		this.sensitivity = initValue(
-			properties.sensitivity,
-			this.defaults.sensitivity.value,
-		);
-		this.baseFrequency = initValue(
-			properties.baseFrequency,
-			this.defaults.baseFrequency.value,
-		);
-		this.excursionOctaves =
-			properties.excursionOctaves || this.defaults.excursionOctaves.value;
-		this.sweep = initValue(properties.sweep, this.defaults.sweep.value);
+		this.automode = options.automode;
+		this.resonance = options.resonance;
+		this.sensitivity = options.sensitivity;
+		this.baseFrequency = options.baseFrequency;
+		this.excursionOctaves = options.excursionOctaves;
+		this.sweep = options.sweep;
 
-		this.activateNode.gain.value = 2;
 		this.envelopeFollower.activate(true);
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+		this.bypass = options.bypass;
 	}
 	get automode() {
 		return this.#automode;
@@ -81,7 +71,7 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	set automode(value) {
 		this.#automode = value;
 		if (value) {
-			this.activateNode.connect(this.envelopeFollower.input);
+			this.activateNode.connect(this.envelopeFollower);
 			this.envelopeFollower.activate(true);
 		} else {
 			this.envelopeFollower.activate(false);
@@ -102,7 +92,7 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	set baseFrequency(value) {
 		this.#baseFrequency = 50 * 10 ** (value * 2);
 		this.#excursionFrequency = Math.min(
-			this.userContext.sampleRate / 2,
+			this.context.sampleRate / 2,
 			this.baseFrequency * 2 ** this.#excursionOctaves,
 		);
 		this.setFilterFreq();
@@ -113,7 +103,7 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	set excursionOctaves(value) {
 		this.#excursionOctaves = value;
 		this.#excursionFrequency = Math.min(
-			this.userContext.sampleRate / 2,
+			this.context.sampleRate / 2,
 			this.baseFrequency * 2 ** this.#excursionOctaves,
 		);
 		this.setFilterFreq();

@@ -2,7 +2,6 @@ import { Super } from "../Super";
 import { OVERDRIVE_DEFAULTS } from "../constants";
 import type { Properties } from "../types/Properties";
 import { dbToWAVolume } from "../utils/dbToWAVolume";
-import { initValue } from "../utils/initValue";
 import { sign } from "../utils/sign";
 import { tanh } from "../utils/tanh";
 
@@ -25,7 +24,7 @@ export class Overdrive extends Super<typeof OVERDRIVE_DEFAULTS> {
 		context: AudioContext,
 		propertiesArg: Properties<typeof OVERDRIVE_DEFAULTS>,
 	) {
-		super();
+		super(context);
 		this.k_nSamples = 8192;
 		this.defaults = OVERDRIVE_DEFAULTS;
 		this.waveshaperAlgorithms = [
@@ -101,17 +100,17 @@ export class Overdrive extends Super<typeof OVERDRIVE_DEFAULTS> {
 			},
 		];
 
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
-		this.userContext = context;
-		this.input = this.userContext.createGain();
-		this.activateNode = this.userContext.createGain();
-		this.inputDrive = this.userContext.createGain();
-		this.waveshaper = this.userContext.createWaveShaper();
-		this.outputDrive = this.userContext.createGain();
-		this.output = this.userContext.createGain();
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
+
+		this.activateNode = new GainNode(context);
+		this.inputDrive = new GainNode(context, {
+			gain: options.drive,
+		});
+		this.waveshaper = new WaveShaperNode(context);
+		this.outputDrive = new GainNode(context);
 
 		this.activateNode.connect(this.inputDrive);
 		this.inputDrive.connect(this.waveshaper);
@@ -119,20 +118,11 @@ export class Overdrive extends Super<typeof OVERDRIVE_DEFAULTS> {
 		this.outputDrive.connect(this.output);
 
 		this.ws_table = new Float32Array(this.k_nSamples);
-		this.drive = initValue(properties.drive, this.defaults.drive.value);
-		this.outputGain = initValue(
-			properties.outputGain,
-			this.defaults.outputGain.value,
-		);
-		this.curveAmount = initValue(
-			properties.curveAmount,
-			this.defaults.curveAmount.value,
-		);
-		this.algorithmIndex = initValue(
-			properties.algorithmIndex,
-			this.defaults.algorithmIndex.value,
-		);
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+		this.drive = options.drive;
+		this.outputGain = options.outputGain;
+		this.curveAmount = options.curveAmount;
+		this.algorithmIndex = options.algorithmIndex;
+		this.bypass = options.bypass;
 	}
 	get drive(): AudioParam {
 		return this.inputDrive.gain;
@@ -162,7 +152,7 @@ export class Overdrive extends Super<typeof OVERDRIVE_DEFAULTS> {
 		this.#outputGain = dbToWAVolume(value);
 		this.outputDrive.gain.setTargetAtTime(
 			this.#outputGain,
-			this.userContext.currentTime,
+			this.context.currentTime,
 			0.01,
 		);
 	}

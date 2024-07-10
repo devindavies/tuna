@@ -1,16 +1,22 @@
 import type { Defaults } from "./types/Defaults";
 import type { Properties } from "./types/Properties";
 
-export abstract class Super<T extends Defaults> extends AudioNode {
-	input!: AudioNode;
-	output!: AudioNode;
+export abstract class Super<T extends Defaults> extends GainNode {
+	output: AudioNode;
 	activateNode!: AudioNode;
 	activateCallback!: (doActivate: boolean) => void;
 	defaults!: T;
-	userContext!: AudioContext;
 
-	_bypass!: boolean;
-	_lastBypassValue!: boolean;
+	_bypass?: boolean;
+	_lastBypassValue?: boolean;
+	_inputConnect: GainNode["connect"];
+
+	constructor(context: AudioContext) {
+		super(context);
+		this._inputConnect = this.connect;
+		this.output = new GainNode(context);
+		this.connect = this.output.connect.bind(this.output);
+	}
 
 	get bypass() {
 		return this._bypass;
@@ -27,18 +33,18 @@ export abstract class Super<T extends Defaults> extends AudioNode {
 
 	activate(doActivate: boolean) {
 		if (doActivate) {
-			this.input.disconnect();
-			this.input.connect(this.activateNode);
+			this.disconnect();
+			this._inputConnect(this.activateNode);
 			if (this.activateCallback) {
 				this.activateCallback(doActivate);
 			}
 		} else {
-			this.input.disconnect();
-			this.input.connect(this.output);
+			this.disconnect();
+			this._inputConnect(this.output);
 		}
 	}
 
-	connectInOrder<C extends AudioNode | Super<T>>(nodeArray: C[]) {
+	connectInOrder<C extends Super<T> | AudioNode>(nodeArray: C[]) {
 		let i = nodeArray.length - 1;
 		while (i--) {
 			if (!nodeArray[i].connect) {
@@ -48,11 +54,7 @@ export abstract class Super<T extends Defaults> extends AudioNode {
 				);
 			}
 			const node = nodeArray[i + 1];
-			if (node instanceof Super) {
-				nodeArray[i].connect(node.input);
-			} else {
-				nodeArray[i].connect(node);
-			}
+			nodeArray[i].connect(node);
 		}
 	}
 
@@ -63,7 +65,7 @@ export abstract class Super<T extends Defaults> extends AudioNode {
 				this.defaults[key as keyof typeof this.defaults].value,
 			]),
 		);
-		return defaults as Properties<typeof this.defaults>;
+		return defaults as Required<Properties<typeof this.defaults>>;
 	}
 
 	automate(
@@ -72,9 +74,7 @@ export abstract class Super<T extends Defaults> extends AudioNode {
 		duration?: number,
 		startTime?: number,
 	) {
-		const start = startTime
-			? ~~(startTime / 1000)
-			: this.userContext.currentTime;
+		const start = startTime ? ~~(startTime / 1000) : this.context.currentTime;
 		const dur = duration ? ~~(duration / 1000) : 0;
 		const _is = this.defaults[property];
 		let param = this[property as keyof this];

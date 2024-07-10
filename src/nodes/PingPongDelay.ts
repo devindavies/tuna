@@ -17,24 +17,35 @@ export class PingPongDelay extends Super<typeof PINGPONGDELAY_DEFAULTS> {
 		context: AudioContext,
 		propertiesArg: Properties<typeof PINGPONGDELAY_DEFAULTS>,
 	) {
-		super();
+		super(context);
 		this.defaults = PINGPONGDELAY_DEFAULTS;
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
-		this.userContext = context;
-		this.input = this.userContext.createGain();
-		this.wet = this.userContext.createGain();
-		this.stereoToMonoMix = this.userContext.createGain();
-		this.feedbackLevel = this.userContext.createGain();
-		this.output = this.userContext.createGain();
-		this.delayLeft = this.userContext.createDelay(10);
-		this.delayRight = this.userContext.createDelay(10);
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
 
-		this.activateNode = this.userContext.createGain();
-		this.splitter = this.userContext.createChannelSplitter(2);
-		this.merger = this.userContext.createChannelMerger(2);
+		this.wet = new GainNode(context, {
+			gain: options.wetLevel,
+		});
+		this.stereoToMonoMix = new GainNode(context);
+		this.feedbackLevel = new GainNode(context, {
+			gain: options.feedback,
+		});
+		this.output = new GainNode(context);
+		this.delayLeft = new DelayNode(context, {
+			delayTime: 10,
+		});
+		this.delayRight = new DelayNode(context, {
+			delayTime: 10,
+		});
+
+		this.activateNode = new GainNode(context);
+		this.splitter = new ChannelSplitterNode(context, {
+			numberOfOutputs: 2,
+		});
+		this.merger = new ChannelMergerNode(context, {
+			numberOfInputs: 2,
+		});
 
 		this.activateNode.connect(this.splitter);
 		this.splitter.connect(this.stereoToMonoMix, 0, 0);
@@ -50,23 +61,10 @@ export class PingPongDelay extends Super<typeof PINGPONGDELAY_DEFAULTS> {
 		this.merger.connect(this.output);
 		this.activateNode.connect(this.output);
 
-		this.delayTimeLeft =
-			properties.delayTimeLeft !== undefined
-				? properties.delayTimeLeft
-				: this.defaults.delayTimeLeft.value;
-		this.delayTimeRight =
-			properties.delayTimeRight !== undefined
-				? properties.delayTimeRight
-				: this.defaults.delayTimeRight.value;
-		this.feedbackLevel.gain.value =
-			properties.feedback !== undefined
-				? properties.feedback
-				: this.defaults.feedback.value;
-		this.wet.gain.value =
-			properties.wetLevel !== undefined
-				? properties.wetLevel
-				: this.defaults.wetLevel.value;
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+		this.delayTimeLeft = options.delayTimeLeft;
+		this.delayTimeRight = options.delayTimeRight;
+
+		this.bypass = options.bypass;
 	}
 	get delayTimeLeft() {
 		return this.#delayTimeLeft;
@@ -86,7 +84,7 @@ export class PingPongDelay extends Super<typeof PINGPONGDELAY_DEFAULTS> {
 		return this.wet.gain;
 	}
 	set wetLevel(value: number) {
-		this.wet.gain.setTargetAtTime(value, this.userContext.currentTime, 0.01);
+		this.wet.gain.setTargetAtTime(value, this.context.currentTime, 0.01);
 	}
 	get feedback(): AudioParam {
 		return this.feedbackLevel.gain;
@@ -94,7 +92,7 @@ export class PingPongDelay extends Super<typeof PINGPONGDELAY_DEFAULTS> {
 	set feedback(value: number) {
 		this.feedbackLevel.gain.setTargetAtTime(
 			value,
-			this.userContext.currentTime,
+			this.context.currentTime,
 			0.01,
 		);
 	}

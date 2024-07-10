@@ -1,7 +1,6 @@
 import { Super } from "../Super";
 import { GAIN_DEFAULTS } from "../constants";
 import type { Properties } from "../types/Properties";
-import { initValue } from "../utils/initValue";
 
 export class Gain extends Super<typeof GAIN_DEFAULTS> {
 	gainNode: GainNode;
@@ -9,38 +8,27 @@ export class Gain extends Super<typeof GAIN_DEFAULTS> {
 		context: AudioContext,
 		propertiesArg: Properties<typeof GAIN_DEFAULTS>,
 	) {
-		super();
+		super(context);
 		this.defaults = GAIN_DEFAULTS;
-		let properties = propertiesArg;
-		if (!properties) {
-			properties = this.getDefaults();
-		}
-		this.userContext = context;
+		const options = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
 
-		this.input = this.userContext.createGain();
-		this.activateNode = this.userContext.createGain();
-		this.gainNode = this.userContext.createGain();
-		this.output = this.userContext.createGain();
+		this.gainNode = this.activateNode = new GainNode(context, {
+			gain: options.gain,
+		});
 
 		this.activateNode.connect(this.gainNode);
 		this.gainNode.connect(this.output);
 
-		//don't use setter at init to avoid smoothing
-		this.gainNode.gain.value = initValue(
-			properties.gain,
-			this.defaults.gain.value,
-		);
-		this.bypass = properties.bypass || this.defaults.bypass.value;
+		this.bypass = options.bypass;
 	}
 
 	get gain(): AudioParam {
 		return this.gainNode.gain;
 	}
 	set gain(value: number) {
-		this.gainNode.gain.setTargetAtTime(
-			value,
-			this.userContext.currentTime,
-			0.01,
-		);
+		this.gainNode.gain.setTargetAtTime(value, this.context.currentTime, 0.01);
 	}
 }
