@@ -22,7 +22,7 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	constructor(
 		instance: Tuna,
 		context: AudioContext,
-		propertiesArg: Properties<typeof WAHWAH_DEFAULTS>,
+		propertiesArg?: Properties<typeof WAHWAH_DEFAULTS>,
 	) {
 		super(context);
 		this.filterFreqTimeout = 0;

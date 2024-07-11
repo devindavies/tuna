@@ -15,7 +15,7 @@ export class Cabinet extends Super<typeof CABINET_DEFAULTS> {
 	constructor(
 		instance: Tuna,
 		context: AudioContext,
-		propertiesArg: Properties<typeof CABINET_DEFAULTS> & {
+		propertiesArg?: Properties<typeof CABINET_DEFAULTS> & {
 			impulsePath?: string;
 		},
 	) {

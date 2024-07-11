@@ -10,7 +10,7 @@ export class MoogFilter extends Super<typeof MOOGFILTER_DEFAULTS> {
 	bufferSize: number;
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof MOOGFILTER_DEFAULTS>,
+		propertiesArg?: Properties<typeof MOOGFILTER_DEFAULTS>,
 	) {
 		super(context);
 		this.defaults = MOOGFILTER_DEFAULTS;

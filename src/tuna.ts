@@ -58,70 +58,70 @@ export class Tuna {
 		this.userInstance = this;
 	}
 
-	createBitcrusher(properties: Properties<Bitcrusher["defaults"]>) {
+	createBitcrusher(properties?: Properties<Bitcrusher["defaults"]>) {
 		return new Bitcrusher(this.userContext, properties);
 	}
 
-	createCompressor(properties: Properties<Compressor["defaults"]>) {
+	createCompressor(properties?: Properties<Compressor["defaults"]>) {
 		return new Compressor(this.userContext, properties);
 	}
 
-	createCabinet(properties: Properties<Cabinet["defaults"]>) {
+	createCabinet(properties?: Properties<Cabinet["defaults"]>) {
 		return new Cabinet(this.userInstance, this.userContext, properties);
 	}
 
-	createChorus(properties: Properties<Chorus["defaults"]>) {
+	createChorus(properties?: Properties<Chorus["defaults"]>) {
 		return new Chorus(this.userInstance, this.userContext, properties);
 	}
 
 	createConvolver(
-		properties: Properties<Convolver["defaults"]> & { impulse?: string },
+		properties?: Properties<Convolver["defaults"]> & { impulse?: string },
 	) {
 		return new Convolver(this.userContext, properties);
 	}
 
-	createDelay(properties: Properties<Delay["defaults"]>) {
+	createDelay(properties?: Properties<Delay["defaults"]>) {
 		return new Delay(this.userContext, properties);
 	}
 
-	createFilter(properties: Properties<Filter["defaults"]>) {
+	createFilter(properties?: Properties<Filter["defaults"]>) {
 		return new Filter(this.userContext, properties);
 	}
 
-	createGain(properties: Properties<Gain["defaults"]>) {
+	createGain(properties?: Properties<Gain["defaults"]>) {
 		return new Gain(this.userContext, properties);
 	}
 
-	createMoogFilter(properties: Properties<MoogFilter["defaults"]>) {
+	createMoogFilter(properties?: Properties<MoogFilter["defaults"]>) {
 		return new MoogFilter(this.userContext, properties);
 	}
 
-	createOverdrive(properties: Properties<Overdrive["defaults"]>) {
+	createOverdrive(properties?: Properties<Overdrive["defaults"]>) {
 		return new Overdrive(this.userContext, properties);
 	}
 
-	createPanner(properties: Properties<Panner["defaults"]>) {
+	createPanner(properties?: Properties<Panner["defaults"]>) {
 		return new Panner(this.userContext, properties);
 	}
 
-	createPhaser(properties: Properties<Phaser["defaults"]>) {
+	createPhaser(properties?: Properties<Phaser["defaults"]>) {
 		return new Phaser(this.userInstance, this.userContext, properties);
 	}
 
-	createPingPongDelay(properties: Properties<PingPongDelay["defaults"]>) {
+	createPingPongDelay(properties?: Properties<PingPongDelay["defaults"]>) {
 		return new PingPongDelay(this.userContext, properties);
 	}
 
-	createTremolo(properties: Properties<Tremolo["defaults"]>) {
+	createTremolo(properties?: Properties<Tremolo["defaults"]>) {
 		return new Tremolo(this.userInstance, this.userContext, properties);
 	}
 
-	createWahWah(properties: Properties<WahWah["defaults"]>) {
+	createWahWah(properties?: Properties<WahWah["defaults"]>) {
 		return new WahWah(this.userInstance, this.userContext, properties);
 	}
 
 	createEnvelopeFollower(
-		properties: Properties<EnvelopeFollower["defaults"]> & {
+		properties?: Properties<EnvelopeFollower["defaults"]> & {
 			target?: WahWah;
 			callback?: <T>(context: { sweep: T }, value: T) => void;
 		},
@@ -130,7 +130,7 @@ export class Tuna {
 	}
 
 	createLFO(
-		properties: Properties<LFO["defaults"]> & {
+		properties?: Properties<LFO["defaults"]> & {
 			target?: AudioParam | AudioNode | AudioNode[];
 			callback?: (
 				// biome-ignore lint/suspicious/noExplicitAny: <explanation>

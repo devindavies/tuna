@@ -9,7 +9,7 @@ export class Bitcrusher extends Super<typeof BITCRUSHER_DEFAULTS> {
 
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof BITCRUSHER_DEFAULTS>,
+		propertiesArg?: Properties<typeof BITCRUSHER_DEFAULTS>,
 	) {
 		super(context);
 		this.defaults = BITCRUSHER_DEFAULTS;

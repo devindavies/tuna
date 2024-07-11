@@ -16,7 +16,7 @@ export class Delay extends Super<typeof DELAY_DEFAULTS> {
 
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof DELAY_DEFAULTS>,
+		propertiesArg?: Properties<typeof DELAY_DEFAULTS>,
 	) {
 		super(context);
 		this.defaults = DELAY_DEFAULTS;

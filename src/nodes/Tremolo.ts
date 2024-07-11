@@ -21,7 +21,7 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 	constructor(
 		instance: Tuna,
 		context: AudioContext,
-		propertiesArg: Properties<typeof TREMOLO_DEFAULTS>,
+		propertiesArg?: Properties<typeof TREMOLO_DEFAULTS>,
 	) {
 		super(context);
 		this.defaults = TREMOLO_DEFAULTS;

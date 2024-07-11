@@ -17,7 +17,7 @@ export class Convolver extends Super<typeof CONVOLVER_DEFAULTS> {
 
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof CONVOLVER_DEFAULTS> & {
+		propertiesArg?: Properties<typeof CONVOLVER_DEFAULTS> & {
 			impulse?: string;
 		},
 	) {

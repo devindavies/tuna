@@ -15,7 +15,7 @@ export class PingPongDelay extends Super<typeof PINGPONGDELAY_DEFAULTS> {
 
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof PINGPONGDELAY_DEFAULTS>,
+		propertiesArg?: Properties<typeof PINGPONGDELAY_DEFAULTS>,
 	) {
 		super(context);
 		this.defaults = PINGPONGDELAY_DEFAULTS;

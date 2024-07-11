@@ -23,7 +23,7 @@ export class EnvelopeFollower extends Super<typeof ENVELOPEFOLLOWER_DEFAULTS> {
 	activated: boolean;
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof ENVELOPEFOLLOWER_DEFAULTS> & {
+		propertiesArg?: Properties<typeof ENVELOPEFOLLOWER_DEFAULTS> & {
 			target?: WahWah;
 			callback?: <T>(context: { sweep: T }, value: T) => void;
 		},

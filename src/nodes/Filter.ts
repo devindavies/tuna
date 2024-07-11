@@ -6,7 +6,7 @@ export class Filter extends Super<typeof FILTER_DEFAULTS> {
 	filter: BiquadFilterNode;
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof FILTER_DEFAULTS> & {
+		propertiesArg?: Properties<typeof FILTER_DEFAULTS> & {
 			resonance?: number;
 		},
 	) {

@@ -6,7 +6,7 @@ export class Gain extends Super<typeof GAIN_DEFAULTS> {
 	gainNode: GainNode;
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof GAIN_DEFAULTS>,
+		propertiesArg?: Properties<typeof GAIN_DEFAULTS>,
 	) {
 		super(context);
 		this.defaults = GAIN_DEFAULTS;

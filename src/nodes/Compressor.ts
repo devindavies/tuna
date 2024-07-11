@@ -18,7 +18,7 @@ export class Compressor extends Super<typeof COMPRESSOR_DEFAULTS> {
 
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof COMPRESSOR_DEFAULTS>,
+		propertiesArg?: Properties<typeof COMPRESSOR_DEFAULTS>,
 	) {
 		super(context);
 

@@ -15,7 +15,7 @@ export class LFO extends Super<typeof LFO_DEFAULTS> {
 
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof LFO_DEFAULTS> & {
+		propertiesArg?: Properties<typeof LFO_DEFAULTS> & {
 			target?: AudioParam | AudioNode[] | AudioNode;
 			callback?: (
 				// biome-ignore lint/suspicious/noExplicitAny: <explanation>

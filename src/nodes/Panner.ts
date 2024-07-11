@@ -12,14 +12,14 @@ export class Panner extends Super<typeof PANNER_DEFAULTS> {
 	pan: AudioParam;
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof PANNER_DEFAULTS>,
+		propertiesArg?: Properties<typeof PANNER_DEFAULTS>,
 	) {
 		super(context);
 		this.defaults = PANNER_DEFAULTS;
-		let options: PannerOptions = propertiesArg;
-		if (!options) {
-			options = this.getDefaults();
-		}
+		const options: PannerOptions = {
+			...this.getDefaults(),
+			...propertiesArg,
+		};
 		this._panner = this.activateNode = new StereoPannerNode(context, options);
 		this.activateNode.connect(this._panner);
 		this._panner.connect(this.output);

@@ -26,7 +26,7 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 	constructor(
 		instance: Tuna,
 		context: AudioContext,
-		propertiesArg: Properties<typeof PHASER_DEFAULTS>,
+		propertiesArg?: Properties<typeof PHASER_DEFAULTS>,
 	) {
 		super(context);
 		this.stage = 4;
