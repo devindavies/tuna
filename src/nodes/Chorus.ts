@@ -1,9 +1,8 @@
 import { Super } from "../Super";
 import { CHORUS_DEFAULTS } from "../constants";
-import type Tuna from "../tuna";
 import type { Properties } from "../types/Properties";
 import { pipe } from "../utils/pipe";
-import type { LFO } from "./LFO";
+import { LFO } from "./LFO";
 
 export class Chorus extends Super<typeof CHORUS_DEFAULTS> {
 	attenuator: GainNode;
@@ -19,10 +18,8 @@ export class Chorus extends Super<typeof CHORUS_DEFAULTS> {
 	#depth!: number;
 	#feedback!: number;
 	#rate!: number;
-	userInstance: Tuna;
 
 	constructor(
-		instance: Tuna,
 		context: AudioContext,
 		propertiesArg?: Properties<typeof CHORUS_DEFAULTS>,
 	) {
@@ -32,8 +29,6 @@ export class Chorus extends Super<typeof CHORUS_DEFAULTS> {
 			...this.getDefaults(),
 			...propertiesArg,
 		};
-
-		this.userInstance = instance;
 
 		this.attenuator = this.activateNode = new GainNode(context);
 		this.splitter = new ChannelSplitterNode(context, {
@@ -47,11 +42,11 @@ export class Chorus extends Super<typeof CHORUS_DEFAULTS> {
 			numberOfInputs: 2,
 		});
 
-		this.lfoL = this.userInstance.createLFO({
+		this.lfoL = new LFO(context, {
 			target: this.delayL.delayTime,
 			callback: pipe,
 		});
-		this.lfoR = this.userInstance.createLFO({
+		this.lfoR = new LFO(context, {
 			target: this.delayR.delayTime,
 			callback: pipe,
 		});

@@ -1,8 +1,7 @@
 import { Super } from "../Super";
 import { WAHWAH_DEFAULTS } from "../constants";
-import type Tuna from "../tuna";
 import type { Properties } from "../types/Properties";
-import type { EnvelopeFollower } from "./EnvelopeFollower";
+import { EnvelopeFollower } from "./EnvelopeFollower";
 
 export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	filterFreqTimeout: ReturnType<typeof setTimeout> | number;
@@ -17,10 +16,8 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	#excursionOctaves!: number;
 	#resonance!: number;
 	#excursionFrequency!: number;
-	userInstance: Tuna;
 
 	constructor(
-		instance: Tuna,
 		context: AudioContext,
 		propertiesArg?: Properties<typeof WAHWAH_DEFAULTS>,
 	) {
@@ -32,12 +29,10 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 			...propertiesArg,
 		};
 
-		this.userInstance = instance;
-
 		this.activateNode = new GainNode(context, {
 			gain: 2,
 		});
-		this.envelopeFollower = this.userInstance.createEnvelopeFollower({
+		this.envelopeFollower = new EnvelopeFollower(context, {
 			target: this,
 			callback: <T>(context: { sweep: T }, value: T) => {
 				context.sweep = value;

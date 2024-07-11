@@ -1,10 +1,9 @@
 import { Super } from "../Super";
 import { TREMOLO_DEFAULTS } from "../constants";
-import type Tuna from "../tuna";
 import type { Properties } from "../types/Properties";
 import { fmod } from "../utils/fmod";
 import { pipe } from "../utils/pipe";
-import type { LFO } from "./LFO";
+import { LFO } from "./LFO";
 
 export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 	splitter: ChannelSplitterNode;
@@ -16,10 +15,8 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 	#intensity!: number;
 	#rate!: number;
 	#stereoPhase!: number;
-	userInstance: Tuna;
 
 	constructor(
-		instance: Tuna,
 		context: AudioContext,
 		propertiesArg?: Properties<typeof TREMOLO_DEFAULTS>,
 	) {
@@ -30,18 +27,17 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 			...propertiesArg,
 		};
 
-		this.userInstance = instance;
 		this.splitter = this.activateNode = new ChannelSplitterNode(context, {
 			numberOfOutputs: 2,
 		});
 		this.amplitudeL = new GainNode(context);
 		this.amplitudeR = new GainNode(context);
 		this.merger = new ChannelMergerNode(context, { numberOfInputs: 2 });
-		this.lfoL = this.userInstance.createLFO({
+		this.lfoL = new LFO(context, {
 			target: this.amplitudeL.gain,
 			callback: pipe,
 		});
-		this.lfoR = this.userInstance.createLFO({
+		this.lfoR = new LFO(context, {
 			target: this.amplitudeR.gain,
 			callback: pipe,
 		});
