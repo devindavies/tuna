@@ -23,13 +23,15 @@ export class EnvelopeFollower extends Super<typeof ENVELOPEFOLLOWER_DEFAULTS> {
 	activated: boolean;
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof ENVELOPEFOLLOWER_DEFAULTS> & {
+		propertiesArg?: Properties<typeof ENVELOPEFOLLOWER_DEFAULTS> & {
 			target?: WahWah;
 			callback?: <T>(context: { sweep: T }, value: T) => void;
 		},
 	) {
-		super(context);
-		this.buffersize = 256;
+		const bufferSize = 256;
+		const processor = context.createScriptProcessor(bufferSize, 1, 1);
+		super(context, processor);
+		this.buffersize = bufferSize;
 		this.envelope = 0;
 		this.sampleRate = 44100;
 		this.defaults = ENVELOPEFOLLOWER_DEFAULTS;
@@ -39,13 +41,9 @@ export class EnvelopeFollower extends Super<typeof ENVELOPEFOLLOWER_DEFAULTS> {
 		};
 
 		this.activated = false;
-		this.jsNode = this.output = this.context.createScriptProcessor(
-			this.buffersize,
-			1,
-			1,
-		);
+		this.jsNode = this.output as ScriptProcessorNode;
 
-		this.connect(this.output);
+		this.inputConnect(this.output);
 
 		this.attackTime = options.attackTime;
 		this.releaseTime = options.releaseTime;

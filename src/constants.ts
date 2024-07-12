@@ -1,5 +1,4 @@
 import { DATATYPE } from "./types/DATATYPE";
-import type { Defaults } from "./types/Defaults";
 
 export const BITCRUSHER_DEFAULTS = {
 	bits: {
@@ -28,7 +27,7 @@ export const BITCRUSHER_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.FLOAT,
 	},
-} satisfies Defaults;
+};
 
 export const COMPRESSOR_DEFAULTS = {
 	threshold: {
@@ -83,7 +82,7 @@ export const COMPRESSOR_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const CABINET_DEFAULTS = {
 	makeupGain: {
@@ -98,7 +97,7 @@ export const CABINET_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const CHORUS_DEFAULTS = {
 	feedback: {
@@ -134,7 +133,7 @@ export const CHORUS_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const CONVOLVER_DEFAULTS = {
 	highCut: {
@@ -177,7 +176,7 @@ export const CONVOLVER_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const DELAY_DEFAULTS = {
 	delayTime: {
@@ -220,7 +219,7 @@ export const DELAY_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const FILTER_DEFAULTS = {
 	frequency: {
@@ -250,11 +249,11 @@ export const FILTER_DEFAULTS = {
 		type: DATATYPE.BOOLEAN,
 	},
 	filterType: {
-		value: "lowpass",
+		value: "lowpass" as BiquadFilterType,
 		automatable: false,
 		type: DATATYPE.STRING,
 	},
-} satisfies Defaults;
+};
 
 export const GAIN_DEFAULTS = {
 	bypass: {
@@ -267,7 +266,7 @@ export const GAIN_DEFAULTS = {
 		automatable: true,
 		type: DATATYPE.FLOAT,
 	},
-} satisfies Defaults;
+};
 
 export const MOOGFILTER_DEFAULTS = {
 	bufferSize: {
@@ -296,7 +295,7 @@ export const MOOGFILTER_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.FLOAT,
 	},
-} satisfies Defaults;
+};
 
 export const OVERDRIVE_DEFAULTS = {
 	drive: {
@@ -334,7 +333,7 @@ export const OVERDRIVE_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const PANNER_DEFAULTS = {
 	bypass: {
@@ -349,7 +348,7 @@ export const PANNER_DEFAULTS = {
 		automatable: true,
 		type: DATATYPE.FLOAT,
 	},
-} satisfies Defaults;
+};
 
 export const PHASER_DEFAULTS = {
 	rate: {
@@ -392,7 +391,7 @@ export const PHASER_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const PINGPONGDELAY_DEFAULTS = {
 	delayTimeLeft: {
@@ -428,7 +427,7 @@ export const PINGPONGDELAY_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const TREMOLO_DEFAULTS = {
 	intensity: {
@@ -457,7 +456,7 @@ export const TREMOLO_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const WAHWAH_DEFAULTS = {
 	automode: {
@@ -505,7 +504,7 @@ export const WAHWAH_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const ENVELOPEFOLLOWER_DEFAULTS = {
 	attackTime: {
@@ -527,7 +526,7 @@ export const ENVELOPEFOLLOWER_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};
 
 export const LFO_DEFAULTS = {
 	frequency: {
@@ -563,4 +562,4 @@ export const LFO_DEFAULTS = {
 		automatable: false,
 		type: DATATYPE.BOOLEAN,
 	},
-} satisfies Defaults;
+};

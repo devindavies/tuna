@@ -22,7 +22,7 @@ export class Overdrive extends Super<typeof OVERDRIVE_DEFAULTS> {
 
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof OVERDRIVE_DEFAULTS>,
+		propertiesArg?: Properties<typeof OVERDRIVE_DEFAULTS>,
 	) {
 		super(context);
 		this.k_nSamples = 8192;

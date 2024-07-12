@@ -16,7 +16,7 @@ export class Delay extends Super<typeof DELAY_DEFAULTS> {
 
 	constructor(
 		context: AudioContext,
-		propertiesArg: Properties<typeof DELAY_DEFAULTS>,
+		propertiesArg?: Properties<typeof DELAY_DEFAULTS>,
 	) {
 		super(context);
 		this.defaults = DELAY_DEFAULTS;
@@ -25,7 +25,8 @@ export class Delay extends Super<typeof DELAY_DEFAULTS> {
 			...propertiesArg,
 		};
 
-		this.activateNode = this.delay = new DelayNode(context, {
+		this.activateNode = new GainNode(context);
+		this.delay = new DelayNode(context, {
 			delayTime: options.delayTime ?? 10,
 		});
 		this.dry = new GainNode(context, { gain: options.dryLevel });

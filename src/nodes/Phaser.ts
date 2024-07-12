@@ -1,9 +1,8 @@
 import { Super } from "../Super";
 import { PHASER_DEFAULTS } from "../constants";
-import type Tuna from "../tuna";
 import type { Properties } from "../types/Properties";
 import { fmod } from "../utils/fmod";
-import type { LFO } from "./LFO";
+import { LFO } from "./LFO";
 
 export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 	stage: number;
@@ -21,12 +20,10 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 	#rate!: number;
 	#feedback!: number;
 	#stereoPhase!: number;
-	userInstance: Tuna;
 
 	constructor(
-		instance: Tuna,
 		context: AudioContext,
-		propertiesArg: Properties<typeof PHASER_DEFAULTS>,
+		propertiesArg?: Properties<typeof PHASER_DEFAULTS>,
 	) {
 		super(context);
 		this.stage = 4;
@@ -37,7 +34,6 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 			...propertiesArg,
 		};
 
-		this.userInstance = instance;
 		this.splitter = this.activateNode = new ChannelSplitterNode(context, {
 			numberOfOutputs: 2,
 		});
@@ -47,12 +43,11 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 		this.feedbackGainNodeR = new GainNode(context);
 		this.merger = new ChannelMergerNode(context, { numberOfInputs: 2 });
 		this.filteredSignal = new GainNode(context);
-		this.output = new GainNode(context);
-		this.lfoL = this.userInstance.createLFO({
+		this.lfoL = new LFO(context, {
 			target: this.filtersL,
 			callback: this.callback,
 		});
-		this.lfoR = this.userInstance.createLFO({
+		this.lfoR = new LFO(context, {
 			target: this.filtersR,
 			callback: this.callback,
 		});
@@ -64,8 +59,8 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 			this.filtersL[i].type = "allpass";
 			this.filtersR[i].type = "allpass";
 		}
-		this.connect(this.splitter);
-		this.connect(this.output);
+		this.inputConnect(this.splitter);
+		this.inputConnect(this.output);
 		this.splitter.connect(this.filtersL[0], 0, 0);
 		this.splitter.connect(this.filtersR[0], 1, 0);
 		this.connectInOrder(this.filtersL);

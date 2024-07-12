@@ -1,8 +1,7 @@
 import { Super } from "../Super";
 import { WAHWAH_DEFAULTS } from "../constants";
-import type Tuna from "../tuna";
 import type { Properties } from "../types/Properties";
-import type { EnvelopeFollower } from "./EnvelopeFollower";
+import { EnvelopeFollower } from "./EnvelopeFollower";
 
 export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	filterFreqTimeout: ReturnType<typeof setTimeout> | number;
@@ -10,7 +9,6 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	filterBp: BiquadFilterNode;
 	filterPeaking: BiquadFilterNode;
 	activateNode: GainNode;
-	output: GainNode;
 	#automode!: boolean;
 	#sweep!: number;
 	#sensitivity!: number;
@@ -18,12 +16,10 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	#excursionOctaves!: number;
 	#resonance!: number;
 	#excursionFrequency!: number;
-	userInstance: Tuna;
 
 	constructor(
-		instance: Tuna,
 		context: AudioContext,
-		propertiesArg: Properties<typeof WAHWAH_DEFAULTS>,
+		propertiesArg?: Properties<typeof WAHWAH_DEFAULTS>,
 	) {
 		super(context);
 		this.filterFreqTimeout = 0;
@@ -33,12 +29,10 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 			...propertiesArg,
 		};
 
-		this.userInstance = instance;
-
 		this.activateNode = new GainNode(context, {
 			gain: 2,
 		});
-		this.envelopeFollower = this.userInstance.createEnvelopeFollower({
+		this.envelopeFollower = new EnvelopeFollower(context, {
 			target: this,
 			callback: <T>(context: { sweep: T }, value: T) => {
 				context.sweep = value;
@@ -46,7 +40,6 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 		});
 		this.filterBp = new BiquadFilterNode(context);
 		this.filterPeaking = new BiquadFilterNode(context);
-		this.output = new GainNode(context);
 
 		//Connect AudioNodes
 		this.activateNode.connect(this.filterBp);
@@ -142,7 +135,7 @@ export class WahWah extends Super<typeof WAHWAH_DEFAULTS> {
 	}
 
 	init() {
-		this.output.gain.value = 1;
+		(this.output as GainNode).gain.value = 1;
 		this.filterPeaking.type = "peaking";
 		this.filterBp.type = "bandpass";
 		this.filterPeaking.frequency.value = 100;
