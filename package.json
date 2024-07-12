@@ -6,7 +6,9 @@
 	"directories": {
 		"test": "tests"
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"type": "module",
 	"sideEffects": false,
 	"exports": {
@@ -31,7 +33,13 @@
 		"type": "git",
 		"url": "git+https://github.com/Theodeus/tuna.git"
 	},
-	"keywords": ["web audio", "audio effects", "tuna", "tunajs", "tuna.js"],
+	"keywords": [
+		"web audio",
+		"audio effects",
+		"tuna",
+		"tunajs",
+		"tuna.js"
+	],
 	"author": "Oskar Eriksson",
 	"license": "MIT",
 	"bugs": {
@@ -40,6 +48,7 @@
 	"homepage": "https://github.com/Theodeus/tuna#readme",
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
+		"@types/audioworklet": "^0.0.57",
 		"@types/node": "^20.14.9",
 		"express": "^4.17.1",
 		"tsup": "^8.1.0",

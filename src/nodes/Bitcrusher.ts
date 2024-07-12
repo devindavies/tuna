@@ -3,7 +3,7 @@ import { BITCRUSHER_DEFAULTS } from "../constants";
 import type { Properties } from "../types/Properties";
 
 export class Bitcrusher extends Super<typeof BITCRUSHER_DEFAULTS> {
-	processor: ScriptProcessorNode & { bits?: number; normfreq?: number };
+	processor!: AudioWorkletNode;
 	bufferSize: number;
 	defaults: typeof BITCRUSHER_DEFAULTS;
 
@@ -21,51 +21,41 @@ export class Bitcrusher extends Super<typeof BITCRUSHER_DEFAULTS> {
 		this.bufferSize = options.bufferSize;
 
 		this.activateNode = new GainNode(context);
-		this.processor = this.context.createScriptProcessor(this.bufferSize, 1, 1);
+		context.audioWorklet.addModule("BitcrusherWorklet").then(() => {
+			this.processor = new AudioWorkletNode(context, "BitcrusherWorklet", {
+				parameterData: {
+					bits: options.bits,
+					normfreq: options.normfreq,
+					bypass: Number(options.bypass),
+				},
+			});
 
-		this.activateNode.connect(this.processor);
-		this.processor.connect(this.output);
+			this.activateNode.connect(this.processor);
+			this.processor.connect(this.output);
 
-		let phaser = 0;
-		let last = 0;
-		let input: Float32Array;
-		let output: Float32Array;
-		let step: number;
-		let i: number;
-		let length: number;
-		this.processor.onaudioprocess = (e) => {
-			input = e.inputBuffer.getChannelData(0);
-			output = e.outputBuffer.getChannelData(0);
-			step = (1 / 2) ** (this.bits || 0);
-			length = input.length;
-			for (i = 0; i < length; i++) {
-				phaser += this.normfreq || 0;
-				if (phaser >= 1.0) {
-					phaser -= 1.0;
-					last = step * Math.floor(input[i] / step + 0.5);
-				}
-				output[i] = last;
-			}
-		};
-
-		this.bits = options.bits;
-		this.normfreq = options.normfreq;
-		this.bypass = options.bypass;
+			this.bits = options.bits;
+			this.normfreq = options.normfreq;
+			this.bypass = options.bypass;
+		});
 	}
 
-	get bits() {
-		return this.processor.bits;
+	get bits(): AudioParam | undefined {
+		return this.processor.parameters.get("bits");
 	}
 
-	set bits(value) {
-		this.processor.bits = value;
+	set bits(value: number) {
+		this.processor.parameters
+			.get("bits")
+			?.setValueAtTime(value, this.context.currentTime);
 	}
 
-	get normfreq() {
-		return this.processor.normfreq;
+	get normfreq(): AudioParam | undefined {
+		return this.processor.parameters.get("normfreq");
 	}
 
-	set normfreq(value) {
-		this.processor.normfreq = value;
+	set normfreq(value: number) {
+		this.processor.parameters
+			.get("normfreq")
+			?.setValueAtTime(value, this.context.currentTime);
 	}
 }
