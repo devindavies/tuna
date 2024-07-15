@@ -100,13 +100,6 @@ export const CABINET_DEFAULTS = {
 };
 
 export const CHORUS_DEFAULTS = {
-	feedback: {
-		value: 0.4,
-		min: 0,
-		max: 0.95,
-		automatable: false,
-		type: DATATYPE.FLOAT,
-	},
 	delay: {
 		value: 0.0045,
 		min: 0,
@@ -269,13 +262,6 @@ export const GAIN_DEFAULTS = {
 };
 
 export const MOOGFILTER_DEFAULTS = {
-	bufferSize: {
-		value: 4096,
-		min: 256,
-		max: 16384,
-		automatable: false,
-		type: DATATYPE.INT,
-	},
 	bypass: {
 		value: false,
 		automatable: false,
