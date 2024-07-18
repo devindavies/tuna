@@ -23,7 +23,7 @@
 	},
 	"scripts": {
 		"prepare": "npm run build",
-		"build": "tsup",
+		"build": "tsup && cp src/wasm-audio/wasm_audio_bg.wasm dist/wasm-audio/wasm_audio_bg.wasm",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"patch": "npm version patch && npm publish"
 	},

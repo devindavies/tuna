@@ -26,6 +26,27 @@ export class MoogFilter extends Super<typeof MOOGFILTER_DEFAULTS> {
 				},
 			});
 
+			this.processor.port.onmessage = (event) => {
+				if (event.type === "wasm-module-loaded") {
+					// The Wasm module was successfully sent to the FFTProcessor running on the
+					// AudioWorklet thread and compiled. This is our cue to configure the signal
+					// detector.
+
+					this.processor.port.postMessage({
+						type: "init-detector",
+					});
+				}
+			};
+
+			WebAssembly.instantiateStreaming(
+				fetch("../wasm-audio/wasm_audio_bg.wasm"),
+			).then((module) => {
+				this.processor.port.postMessage({
+					type: "send-wasm-module",
+					module: module,
+				});
+			});
+
 			this.activateNode.connect(this.processor);
 			this.processor.connect(this.output);
 

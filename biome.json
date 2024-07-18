@@ -1,14 +1,20 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
 	"files": {
-		"ignore": ["node_modules", "dist", "tuna-min.js", "tuna.js"]
+		"ignore": [
+			"node_modules",
+			"dist",
+			"tuna-min.js",
+			"tuna.js",
+			"./src/wasm-audio/**"
+		]
 	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true
 		},
-		"ignore": ["src/TextDecoder.js"]
+		"ignore": ["src/TextDecoder.js", "./src/wasm-audio/**"]
 	},
 	"formatter": {
 		"enabled": true,
