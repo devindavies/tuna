@@ -1,23 +1,18 @@
 import { Super } from "../Super";
 import { CHORUS_DEFAULTS } from "../constants";
 import type { Properties } from "../types/Properties";
-import { pipe } from "../utils/pipe";
 import { LFO } from "./LFO";
 
 export class Chorus extends Super<typeof CHORUS_DEFAULTS> {
 	attenuator: GainNode;
-	splitter: ChannelSplitterNode;
-	delayL: DelayNode;
-	delayR: DelayNode;
-	feedbackGainNodeLR: GainNode;
-	feedbackGainNodeRL: GainNode;
-	merger: ChannelMergerNode;
-	lfoL: LFO;
-	lfoR: LFO;
-	#delay!: number;
-	#depth!: number;
-	#feedback!: number;
-	#rate!: number;
+	delayNode: DelayNode;
+	dry: GainNode;
+	wet: GainNode;
+	lfo: LFO;
+	modulationGain: GainNode;
+	delay: AudioParam;
+	depth: AudioParam;
+	rate: AudioParam | undefined;
 
 	constructor(
 		context: AudioContext,
@@ -31,96 +26,27 @@ export class Chorus extends Super<typeof CHORUS_DEFAULTS> {
 		};
 
 		this.attenuator = this.activateNode = new GainNode(context);
-		this.splitter = new ChannelSplitterNode(context, {
-			numberOfOutputs: 2,
+		this.dry = new GainNode(context, { gain: 0.5 });
+		this.wet = new GainNode(context, { gain: 0.5 });
+		this.delayNode = new DelayNode(context, {
+			delayTime: options.delay,
 		});
-		this.delayL = new DelayNode(context);
-		this.delayR = new DelayNode(context);
-		this.feedbackGainNodeLR = new GainNode(context);
-		this.feedbackGainNodeRL = new GainNode(context);
-		this.merger = new ChannelMergerNode(context, {
-			numberOfInputs: 2,
+		this.lfo = new LFO(context, {
+			frequency: options.rate,
 		});
+		this.modulationGain = new GainNode(context, { gain: options.depth });
+		this.lfo.connect(this.modulationGain);
+		this.modulationGain.connect(this.delayNode.delayTime);
 
-		this.lfoL = new LFO(context, {
-			target: this.delayL.delayTime,
-			callback: pipe,
-		});
-		this.lfoR = new LFO(context, {
-			target: this.delayR.delayTime,
-			callback: pipe,
-		});
+		this.attenuator.connect(this.dry);
+		this.attenuator.connect(this.delayNode);
+		this.delayNode.connect(this.wet);
+		this.dry.connect(this.output);
+		this.wet.connect(this.output);
 
-		this.inputConnect(this.attenuator);
-		this.attenuator.connect(this.output);
-		this.attenuator.connect(this.splitter);
-		this.splitter.connect(this.delayL, 0);
-		this.splitter.connect(this.delayR, 1);
-		this.delayL.connect(this.feedbackGainNodeLR);
-		this.delayR.connect(this.feedbackGainNodeRL);
-		this.feedbackGainNodeLR.connect(this.delayR);
-		this.feedbackGainNodeRL.connect(this.delayL);
-		this.delayL.connect(this.merger, 0, 0);
-		this.delayR.connect(this.merger, 0, 1);
-		this.merger.connect(this.output);
-
-		this.feedback = options.feedback;
-		this.rate = options.rate;
-		this.delay = options.delay;
-		this.depth = options.depth;
-		this.lfoR.phase = Math.PI / 2;
-		this.attenuator.gain.value = 0.6934; // 1 / (10 ^ (((20 * log10(3)) / 3) / 20))
-		this.lfoL.activate(true);
-		this.lfoR.activate(true);
+		this.rate = this.lfo.frequency;
+		this.delay = this.delayNode.delayTime;
+		this.depth = this.modulationGain.gain;
 		this.bypass = options.bypass;
-	}
-
-	get delay() {
-		return this.#delay;
-	}
-
-	set delay(value: number) {
-		this.#delay = 0.0002 * (10 ** value * 2);
-		this.lfoL.offset = this.#delay;
-		this.lfoR.offset = this.#delay;
-		this.#depth = this.#depth;
-	}
-
-	get depth() {
-		return this.#depth;
-	}
-
-	set depth(value: number) {
-		this.#depth = value;
-		this.lfoL.oscillation = this.#depth * this.#delay;
-		this.lfoR.oscillation = this.#depth * this.#delay;
-	}
-
-	get feedback() {
-		return this.#feedback;
-	}
-
-	set feedback(value: number) {
-		this.#feedback = value;
-		this.feedbackGainNodeLR.gain.setTargetAtTime(
-			this.#feedback,
-			this.context.currentTime,
-			0.01,
-		);
-		this.feedbackGainNodeRL.gain.setTargetAtTime(
-			this.#feedback,
-			this.context.currentTime,
-			0.01,
-		);
-	}
-
-	get rate() {
-		return this.#rate;
-	}
-
-	set rate(value: number) {
-		this.#rate = value;
-		this.lfoL.frequency = this.#rate;
-		this.lfoR.frequency = this.#rate;
 	}
 }

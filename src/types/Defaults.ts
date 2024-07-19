@@ -4,7 +4,7 @@ export type Defaults = Record<
 	{
 		min?: number;
 		max?: number;
-		value: number | boolean | BiquadFilterType;
+		value: number | boolean | BiquadFilterType | OscillatorType;
 		automatable: boolean;
 		type: DATATYPE;
 		scaled?: boolean;
