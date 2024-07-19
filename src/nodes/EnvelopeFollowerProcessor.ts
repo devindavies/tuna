@@ -52,7 +52,9 @@ export const envelopeFollowerProcessorURL = URL.createObjectURL(
 
 						let current: number;
 
-						let rms = 0;
+						let rms: number;
+						let i: number;
+						rms = i = 0;
 
 						for (let channelNum = 0; channelNum < input.length; channelNum++) {
 							const inputChannel = input[channelNum];
