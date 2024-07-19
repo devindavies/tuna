@@ -1,0 +1,17 @@
+{
+  "name": "wasm-audio",
+  "collaborators": [
+    "devindavies"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "wasm_audio_bg.wasm",
+    "wasm_audio.js",
+    "wasm_audio.d.ts"
+  ],
+  "module": "wasm_audio.js",
+  "types": "wasm_audio.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
