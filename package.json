@@ -6,13 +6,9 @@
 	"directories": {
 		"test": "tests"
 	},
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"type": "module",
-	"sideEffects": [
-		"./src/TextDecoder.js"
-	],
+	"sideEffects": ["./src/TextDecoder.js"],
 	"exports": {
 		".": {
 			"import": {
@@ -33,26 +29,19 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/devindavies/tuna.git"
+		"url": "git+https://github.com/Theodeus/tuna.git"
 	},
-	"keywords": [
-		"web audio",
-		"audio effects",
-		"tuna",
-		"tunajs",
-		"tuna.js"
-	],
+	"keywords": ["web audio", "audio effects", "tuna", "tunajs", "tuna.js"],
 	"author": "Oskar Eriksson",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/devindavies/tuna/issues"
+		"url": "https://github.com/Theodeus/tuna/issues"
 	},
-	"homepage": "https://github.com/devindavies/tuna#readme",
+	"homepage": "https://github.com/Theodeus/tuna#readme",
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
 		"@types/audioworklet": "^0.0.57",
 		"@types/node": "^20.14.9",
-		"esbuild-plugin-wasm": "^1.1.0",
 		"express": "^4.17.1",
 		"tsup": "^8.1.0",
 		"typescript": "^5.5.2"
