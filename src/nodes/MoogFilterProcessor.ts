@@ -1,5 +1,4 @@
 import "../TextDecoder.js";
-import init, { process } from "../wasm-audio/wasm_audio.js";
 
 export const moogFilterProcessorURL = URL.createObjectURL(
 	new Blob(
@@ -7,11 +6,6 @@ export const moogFilterProcessorURL = URL.createObjectURL(
 			"(",
 			(() => {
 				class MoogFilterProcessor extends AudioWorkletProcessor {
-					processor?: (
-						audio_samples: Float32Array,
-						cutoff: number,
-						resonance: number,
-					) => Float32Array;
 					static get parameterDescriptors() {
 						return [
 							{
@@ -40,26 +34,7 @@ export const moogFilterProcessorURL = URL.createObjectURL(
 						this.port.onmessage = (event) => this.onmessage(event);
 					}
 
-					onmessage(event: MessageEvent) {
-						const { type, data } = event.data;
-						switch (type) {
-							case "send-wasm-module": {
-								// RTANode has sent us a message containing the Wasm library to load into
-								// our context as well as information about the audio device used for
-								// recording.
-								init(WebAssembly.compile(data)).then(() => {
-									this.port.postMessage({ type: "wasm-module-loaded" });
-								});
-								//this.canvasPort = event.ports[0];
-								break;
-							}
-							case "init-detector": {
-								this.processor = process;
-
-								break;
-							}
-						}
-					}
+					onmessage(_event: MessageEvent) {}
 
 					process(
 						inputs: Float32Array[][],
@@ -75,10 +50,35 @@ export const moogFilterProcessorURL = URL.createObjectURL(
 							const inputChannel = input[channelNum];
 							const outputChannel = output[channelNum];
 
-							if (this.processor) {
-								outputChannel.set(
-									this.processor(inputChannel, cutoff, resonance),
-								);
+							let in1 = 0.0;
+							let in2 = 0.0;
+							let in3 = 0.0;
+							let in4 = 0.0;
+							let out1 = 0.0;
+							let out2 = 0.0;
+							let out3 = 0.0;
+							let out4 = 0.0;
+
+							let f: number;
+							let fb: number;
+							let inputFactor: number;
+
+							f = (cutoff || 0) * 1.16;
+							inputFactor = 0.35013 * (f * f) * (f * f);
+							fb = (resonance || 0) * (1.0 - 0.15 * f * f);
+
+							for (let i = 0; i < inputChannel.length; i++) {
+								inputChannel[i] -= out4 * fb;
+								inputChannel[i] *= inputFactor;
+								out1 = inputChannel[i] + 0.3 * in1 + (1 - f) * out1; // Pole 1
+								in1 = inputChannel[i];
+								out2 = out1 + 0.3 * in2 + (1 - f) * out2; // Pole 2
+								in2 = out1;
+								out3 = out2 + 0.3 * in3 + (1 - f) * out3; // Pole 3
+								in3 = out2;
+								out4 = out3 + 0.3 * in4 + (1 - f) * out4; // Pole 4
+								in4 = out3;
+								outputChannel[i] = out4;
 							}
 						}
 

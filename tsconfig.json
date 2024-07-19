@@ -28,7 +28,6 @@
         "global.d.ts"
     ],
     "exclude": [
-        "dist",
-        "./src/wasm-audio/**"
+        "dist"
     ]
 }

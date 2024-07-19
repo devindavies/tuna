@@ -7,5 +7,3 @@ drums.wav
 .idea/
 tuna.js
 dist/
-
-wasm-audio/target
