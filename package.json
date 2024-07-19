@@ -6,11 +6,8 @@
 	"directories": {
 		"test": "tests"
 	},
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"type": "module",
-	"sideEffects": false,
 	"exports": {
 		".": {
 			"import": {
@@ -33,13 +30,7 @@
 		"type": "git",
 		"url": "git+https://github.com/Theodeus/tuna.git"
 	},
-	"keywords": [
-		"web audio",
-		"audio effects",
-		"tuna",
-		"tunajs",
-		"tuna.js"
-	],
+	"keywords": ["web audio", "audio effects", "tuna", "tunajs", "tuna.js"],
 	"author": "Oskar Eriksson",
 	"license": "MIT",
 	"bugs": {

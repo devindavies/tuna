@@ -15,7 +15,6 @@ export { Tremolo } from "./nodes/Tremolo";
 export { WahWah } from "./nodes/WahWah";
 export { EnvelopeFollower } from "./nodes/EnvelopeFollower";
 export { LFO } from "./nodes/LFO";
-export { BitcrusherWorklet } from "./nodes/BitcrusherWorklet";
 
 /*
     Copyright (c) 2012 DinahMoe AB & Oskar Eriksson

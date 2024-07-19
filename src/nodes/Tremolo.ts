@@ -2,7 +2,6 @@ import { Super } from "../Super";
 import { TREMOLO_DEFAULTS } from "../constants";
 import type { Properties } from "../types/Properties";
 import { fmod } from "../utils/fmod";
-import { pipe } from "../utils/pipe";
 import { LFO } from "./LFO";
 
 export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
@@ -33,14 +32,8 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 		this.amplitudeL = new GainNode(context);
 		this.amplitudeR = new GainNode(context);
 		this.merger = new ChannelMergerNode(context, { numberOfInputs: 2 });
-		this.lfoL = new LFO(context, {
-			target: this.amplitudeL.gain,
-			callback: pipe,
-		});
-		this.lfoR = new LFO(context, {
-			target: this.amplitudeR.gain,
-			callback: pipe,
-		});
+		this.lfoL = new LFO(context);
+		this.lfoR = new LFO(context);
 
 		this.inputConnect(this.splitter);
 		this.splitter.connect(this.amplitudeL, 0);
@@ -57,8 +50,8 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 		this.lfoR.offset = 1 - this.intensity / 2;
 		this.lfoL.phase = (this.stereoPhase * Math.PI) / 180;
 
-		this.lfoL.activate(true);
-		this.lfoR.activate(true);
+		this.lfoL.connect(this.amplitudeL.gain);
+		this.lfoR.connect(this.amplitudeR.gain);
 		this.bypass = options.bypass;
 	}
 	get intensity() {
@@ -84,8 +77,11 @@ export class Tremolo extends Super<typeof TREMOLO_DEFAULTS> {
 	}
 	set stereoPhase(value) {
 		this.#stereoPhase = value;
-		let newPhase = this.lfoL._phase + (this.#stereoPhase * Math.PI) / 180;
-		newPhase = fmod(newPhase, 2 * Math.PI);
-		this.lfoR.phase = newPhase;
+		if (this.lfoL.phase?.value) {
+			let newPhase =
+				this.lfoL.phase.value + (this.#stereoPhase * Math.PI) / 180;
+			newPhase = fmod(newPhase, 2 * Math.PI);
+			this.lfoR.phase = newPhase;
+		}
 	}
 }

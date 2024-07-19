@@ -1,10 +1,10 @@
 import { Super } from "../Super";
 import { BITCRUSHER_DEFAULTS } from "../constants";
 import type { Properties } from "../types/Properties";
+import { bitcrusherProcessorURL } from "./BitcrusherProcessor";
 
 export class Bitcrusher extends Super<typeof BITCRUSHER_DEFAULTS> {
 	processor!: AudioWorkletNode;
-	bufferSize: number;
 	defaults: typeof BITCRUSHER_DEFAULTS;
 
 	constructor(
@@ -18,11 +18,9 @@ export class Bitcrusher extends Super<typeof BITCRUSHER_DEFAULTS> {
 			...propertiesArg,
 		};
 
-		this.bufferSize = options.bufferSize;
-
 		this.activateNode = new GainNode(context);
-		context.audioWorklet.addModule("BitcrusherWorklet").then(() => {
-			this.processor = new AudioWorkletNode(context, "BitcrusherWorklet", {
+		context.audioWorklet.addModule(bitcrusherProcessorURL).then(() => {
+			this.processor = new AudioWorkletNode(context, "BitcrusherProcessor", {
 				parameterData: {
 					bits: options.bits,
 					normfreq: options.normfreq,

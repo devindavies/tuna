@@ -10,11 +10,14 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 	feedbackGainNodeL: GainNode;
 	feedbackGainNodeR: GainNode;
 	merger: ChannelMergerNode;
-	filteredSignal: GainNode;
 	filtersL: BiquadFilterNode[];
 	filtersR: BiquadFilterNode[];
 	lfoL: LFO;
 	lfoR: LFO;
+	depthNodeL: GainNode;
+	depthNodeR: GainNode;
+	depthRangeNodeL: GainNode;
+	depthRangeNodeR: GainNode;
 	#depth!: number;
 	#baseModulationFrequency!: number;
 	#rate!: number;
@@ -41,21 +44,29 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 		this.filtersR = [];
 		this.feedbackGainNodeL = new GainNode(context);
 		this.feedbackGainNodeR = new GainNode(context);
+
+		this.depthRangeNodeL = new GainNode(context, { gain: 1000 });
+		this.depthRangeNodeR = new GainNode(context, { gain: 1000 });
+		this.depthNodeL = new GainNode(context, { gain: 0.5 });
+		this.depthNodeR = new GainNode(context, { gain: 0.5 });
+
 		this.merger = new ChannelMergerNode(context, { numberOfInputs: 2 });
-		this.filteredSignal = new GainNode(context);
+
 		this.lfoL = new LFO(context, {
-			target: this.filtersL,
-			callback: this.callback,
+			frequency: 4,
 		});
 		this.lfoR = new LFO(context, {
-			target: this.filtersR,
-			callback: this.callback,
+			frequency: 4,
 		});
 
 		let i = this.stage;
 		while (i--) {
-			this.filtersL[i] = new BiquadFilterNode(context);
-			this.filtersR[i] = new BiquadFilterNode(context);
+			this.filtersL[i] = new BiquadFilterNode(context, {
+				frequency: options.baseModulationFrequency,
+			});
+			this.filtersR[i] = new BiquadFilterNode(context, {
+				frequency: options.baseModulationFrequency,
+			});
 			this.filtersL[i].type = "allpass";
 			this.filtersR[i].type = "allpass";
 		}
@@ -88,40 +99,46 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 	}
 	set depth(value) {
 		this.#depth = value;
-		this.lfoL.oscillation = this.#baseModulationFrequency * this.#depth;
-		this.lfoR.oscillation = this.#baseModulationFrequency * this.#depth;
+		this.depthNodeL.gain.setValueAtTime(value, this.context.currentTime);
+		this.depthNodeR.gain.setValueAtTime(value, this.context.currentTime);
 	}
 	get rate() {
 		return this.#rate;
 	}
 	set rate(value) {
 		this.#rate = value;
-		this.lfoL.frequency = this.#rate;
-		this.lfoR.frequency = this.#rate;
+		this.lfoL.frequency?.setValueAtTime(value, this.context.currentTime);
+		this.lfoR.frequency?.setValueAtTime(value, this.context.currentTime);
 	}
 	get baseModulationFrequency() {
 		return this.#baseModulationFrequency;
 	}
 	set baseModulationFrequency(value) {
 		this.#baseModulationFrequency = value;
-		this.lfoL.offset = this.#baseModulationFrequency;
-		this.lfoR.offset = this.#baseModulationFrequency;
-		this.depth = this.#depth;
+		for (let stage = 0; stage < this.stage; stage++) {
+			this.filtersL[stage].frequency.setValueAtTime(
+				value,
+				this.context.currentTime,
+			);
+			this.filtersR[stage].frequency.setValueAtTime(
+				value,
+				this.context.currentTime,
+			);
+		}
 	}
+
 	get feedback() {
 		return this.#feedback;
 	}
 	set feedback(value) {
 		this.#feedback = value;
-		this.feedbackGainNodeL.gain.setTargetAtTime(
+		this.feedbackGainNodeL.gain.setValueAtTime(
 			this.#feedback,
 			this.context.currentTime,
-			0.01,
 		);
-		this.feedbackGainNodeR.gain.setTargetAtTime(
+		this.feedbackGainNodeR.gain.setValueAtTime(
 			this.#feedback,
 			this.context.currentTime,
-			0.01,
 		);
 	}
 	get stereoPhase() {
@@ -129,9 +146,12 @@ export class Phaser extends Super<typeof PHASER_DEFAULTS> {
 	}
 	set stereoPhase(value) {
 		this.#stereoPhase = value;
-		let newPhase = this.lfoL._phase + (this.#stereoPhase * Math.PI) / 180;
-		newPhase = fmod(newPhase, 2 * Math.PI);
-		this.lfoR._phase = newPhase;
+		if (this.lfoL.phase?.value) {
+			let newPhase =
+				this.lfoL.phase?.value + (this.#stereoPhase * Math.PI) / 180;
+			newPhase = fmod(newPhase, 2 * Math.PI);
+			this.lfoR.phase = newPhase;
+		}
 	}
 
 	callback(filters: { frequency: { value: number } }[], value: number) {
