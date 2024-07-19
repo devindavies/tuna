@@ -1,5 +1,3 @@
-import "../TextDecoder.js";
-
 export const bitcrusherProcessorURL = URL.createObjectURL(
 	new Blob(
 		[

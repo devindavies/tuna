@@ -1,5 +1,3 @@
-import "../TextDecoder.js";
-
 export const moogFilterProcessorURL = URL.createObjectURL(
 	new Blob(
 		[

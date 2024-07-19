@@ -1,5 +1,3 @@
-import "../TextDecoder.js";
-
 export const LFOProcessorURL = URL.createObjectURL(
 	new Blob(
 		[
