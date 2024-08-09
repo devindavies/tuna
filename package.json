@@ -3,9 +3,7 @@
 	"version": "2.0.0",
 	"description": "Audio effects library for the Web Audio API",
 	"main": "./dist/index.js",
-	"directories": {
-		"test": "tests"
-	},
+
 	"files": ["dist"],
 	"type": "module",
 	"exports": {
@@ -41,7 +39,6 @@
 		"@biomejs/biome": "^1.8.3",
 		"@types/audioworklet": "^0.0.57",
 		"@types/node": "^20.14.9",
-		"express": "^4.17.1",
 		"tsup": "^8.1.0",
 		"typescript": "^5.5.2"
 	}
