@@ -37,7 +37,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@types/audioworklet": "^0.0.71",
-		"@types/node": "^20.17.24",
+		"@types/node": "^22.13.10",
 		"tsup": "^8.4.0",
 		"typescript": "^5.8.2"
 	}
