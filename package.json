@@ -3,18 +3,17 @@
 	"version": "2.0.0",
 	"description": "Audio effects library for the Web Audio API",
 	"main": "./dist/index.js",
-
 	"files": ["dist"],
 	"type": "module",
 	"exports": {
 		".": {
 			"import": {
-				"default": "./dist/index.js",
-				"types": "./dist/index.d.ts"
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
 			},
 			"require": {
-				"default": "./index/index.cjs",
-				"types": "./index/index.d.cts"
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
 			}
 		}
 	},
@@ -36,10 +35,10 @@
 	},
 	"homepage": "https://github.com/Theodeus/tuna#readme",
 	"devDependencies": {
-		"@biomejs/biome": "^1.8.3",
-		"@types/audioworklet": "^0.0.65",
-		"@types/node": "^22.1.0",
-		"tsup": "^8.1.0",
-		"typescript": "^5.5.2"
+		"@biomejs/biome": "^1.9.4",
+		"@types/audioworklet": "^0.0.71",
+		"@types/node": "^20.17.24",
+		"tsup": "^8.4.0",
+		"typescript": "^5.8.2"
 	}
 }
