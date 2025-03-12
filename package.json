@@ -18,7 +18,6 @@
 		}
 	},
 	"scripts": {
-		"prepare": "npm run build",
 		"dev": "tsup --watch",
 		"build": "tsup",
 		"format-and-lint": "biome check .",
