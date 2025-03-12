@@ -27,15 +27,14 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/Theodeus/tuna.git"
+		"url": "git+https://github.com/devindavies/tuna.git"
 	},
 	"keywords": ["web audio", "audio effects", "tuna", "tunajs", "tuna.js"],
-	"author": "Oskar Eriksson",
+	"author": "Devin Davies",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/Theodeus/tuna/issues"
+		"url": "https://github.com/deindavies/tuna/issues"
 	},
-	"homepage": "https://github.com/Theodeus/tuna#readme",
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@changesets/cli": "^2.28.1",
