@@ -1,9 +1,11 @@
 {
 	"name": "@devinmdavies/tunajs",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Audio effects library for the Web Audio API",
 	"main": "./dist/index.js",
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"type": "module",
 	"exports": {
 		".": {
@@ -28,7 +30,13 @@
 		"type": "git",
 		"url": "git+https://github.com/devindavies/tuna.git"
 	},
-	"keywords": ["web audio", "audio effects", "tuna", "tunajs", "tuna.js"],
+	"keywords": [
+		"web audio",
+		"audio effects",
+		"tuna",
+		"tunajs",
+		"tuna.js"
+	],
 	"author": "Devin Davies",
 	"license": "MIT",
 	"bugs": {
