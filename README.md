@@ -25,5 +25,5 @@ An audio effects library for the Web Audio API. Based on the work by Oskar Eriks
 # Usage
 
 ```
-npm install tunajs
+npm install @devinmdavies/tunajs
 ```
