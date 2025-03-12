@@ -1,6 +1,6 @@
 {
-	"name": "tunajs",
-	"version": "2.0.0",
+	"name": "@devinmdavies/tunajs",
+	"version": "1.0.0",
 	"description": "Audio effects library for the Web Audio API",
 	"main": "./dist/index.js",
 	"files": ["dist"],
@@ -19,9 +19,11 @@
 	},
 	"scripts": {
 		"prepare": "npm run build",
+		"dev": "tsup --watch",
 		"build": "tsup",
+		"format-and-lint": "biome check .",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"patch": "npm version patch && npm publish"
+		"release": "changeset version && changeset publish"
 	},
 	"repository": {
 		"type": "git",
@@ -36,9 +38,11 @@
 	"homepage": "https://github.com/Theodeus/tuna#readme",
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
+		"@changesets/cli": "^2.28.1",
 		"@types/audioworklet": "^0.0.71",
 		"@types/node": "^22.13.10",
 		"tsup": "^8.4.0",
 		"typescript": "^5.8.2"
-	}
+	},
+	"packageManager": "npm@10.5.0"
 }
