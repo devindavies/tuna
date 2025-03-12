@@ -24,7 +24,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build
         run: npm run build
@@ -45,7 +45,7 @@ jobs:
           cache: "npm"
 
       - name: Install Dependencies
-        run: npm i
+        run: npm ci
 
       - name: Publish to npm
         id: changesets
